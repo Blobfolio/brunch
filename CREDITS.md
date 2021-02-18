@@ -448,7 +448,7 @@ limitations under the License.
 **Used By:**
 
 * [brunch 0.1.0](https://github.com/Blobfolio/brunch)
-* [fyi_num 0.6.1](https://github.com/Blobfolio/fyi)
+* [dactyl 0.1.0](https://github.com/Blobfolio/dactyl)
 
 
 ```

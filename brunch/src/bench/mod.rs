@@ -12,7 +12,7 @@ use crate::{
 	History,
 	Stats,
 };
-use fyi_num::{
+use dactyl::{
 	NiceU32,
 	NicePercent,
 };

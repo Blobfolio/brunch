@@ -11,9 +11,9 @@ publish = false
 [dependencies]
 serde_json = "1.0.*"
 
-[dependencies.fyi_num]
-git = "https://github.com/Blobfolio/fyi.git"
-tag = "v0.6.1"
+[dependencies.dactyl]
+git = "https://github.com/Blobfolio/dactyl.git"
+tag = "v0.1.0"
 
 [dependencies.serde]
 version = "1.0.*"

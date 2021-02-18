@@ -36,23 +36,23 @@ An example bench file would look something like:
 
 ```
 use brunch::Bench;
-use fyi_num::NiceU8;
+use dactyl::NiceU8;
 use std::time::Duration;
 
 brunch::benches!(
-    Bench::new("fyi_num::NiceU8", "from(0)")
+    Bench::new("dactyl::NiceU8", "from(0)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(0_u8)),
 
-    Bench::new("fyi_num::NiceU8", "from(18)")
+    Bench::new("dactyl::NiceU8", "from(18)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(18_u8)),
 
-    Bench::new("fyi_num::NiceU8", "from(101)")
+    Bench::new("dactyl::NiceU8", "from(101)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(101_u8)),
 
-    Bench::new("fyi_num::NiceU8", "from(u8::MAX)")
+    Bench::new("dactyl::NiceU8", "from(u8::MAX)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(u8::MAX))
 );
