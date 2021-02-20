@@ -30,6 +30,9 @@ const ITER_SCALE: f64 = 1.1;
 
 #[allow(missing_debug_implementations)]
 /// # Benchmark.
+///
+/// This struct holds a single "bench" you wish to run. See the main crate
+/// documentation for more information.
 pub struct Bench {
 	namespace: String,
 	name: String,
@@ -66,7 +69,7 @@ impl Bench {
 	/// By default, benches will run for around 3 seconds. This value can be
 	/// increased for slow benchmarks, or decreased for fast ones, as needed.
 	///
-	/// Note: this must be called before supplying a callback or it will not
+	/// Note: this must be called *before* supplying a callback or it will not
 	/// apply.
 	pub const fn timed(mut self, time: Duration) -> Self {
 		self.limit = time;
@@ -77,6 +80,20 @@ impl Bench {
 	/// # With Callback.
 	///
 	/// Run a benchmark that does not take any arguments.
+	///
+	/// ## Examples
+	///
+	/// ```no_run
+	/// use brunch::Bench;
+	/// use dactyl::NiceU8;
+	/// use std::time::Duration;
+	///
+	/// brunch::benches!(
+    /// Bench::new("dactyl::NiceU8", "from(0)")
+    ///     .timed(Duration::from_secs(1))
+    ///     .with(|| NiceU8::from(0_u8))
+    /// );
+	/// ```
 	pub fn with<F, O>(mut self, mut cb: F) -> Self
 	where F: FnMut() -> O {
 		let mut data = Vec::new();
@@ -173,7 +190,10 @@ impl Bench {
 
 
 #[derive(Debug)]
-/// # Benchmark Result
+/// # Benchmark Result.
+///
+/// This is generated automatically when using the [`benches`] macro; it is
+/// not intended to be used directly.
 pub struct BenchResult {
 	caller: String,
 	time: String,

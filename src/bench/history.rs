@@ -18,6 +18,9 @@ use std::{
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 /// # History.
+///
+/// This is triggered automatically when using the [`benches`] macro; it is
+/// not intended to be called manually.
 pub struct History(HashMap<String, Stats>);
 
 impl Default for History {

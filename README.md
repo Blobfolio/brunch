@@ -6,7 +6,11 @@ As with all Rust benchmarking, there are a lot of caveats, and results might be 
 
 In theory, this library can reach pico-second scales (it clocks increasingly large batches and divides accordingly), but background noise and setup overhead will likely prevent times getting quite as low as they might "actually" be. It can go as long as milliseconds, but might require increased time limits to reach sufficient samples in such cases.
 
-**Note:** Brunch is a work-in-progress and is subject to change. In fact, it will almost certainly change quite a bit. But it's here if you want to play with it anyway!
+
+
+## Work in Progress
+
+This crate is still under heavy development. It is subject to change (and almost certainly going to) so you probably don't want to rely on it in production yet. But that said, feel free to poke around, steal code, find inspiration, etc.
 
 
 
@@ -15,12 +19,11 @@ In theory, this library can reach pico-second scales (it clocks increasingly lar
 Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
 
 ```
-[dev-dependencies.brunch]
-git = "https://github.com/Blobfolio/brunch.git"
-tag = "v0.1.*"
+[dev-dependencies]
+brunch = "0.1.*"
 ```
 
-Benchemarks are also defined in `Cargo.toml`. Just be sure to set `harness = false`:
+Benchemarks are also defined in `Cargo.toml` the usual way. Just be sure to set `harness = false`:
 
 ```
 [[bench]]
@@ -38,23 +41,23 @@ An example bench file would look something like:
 
 ```
 use brunch::Bench;
-use fyi_num::NiceU8;
+use dactyl::NiceU8;
 use std::time::Duration;
 
 brunch::benches!(
-    Bench::new("fyi_num::NiceU8", "from(0)")
+    Bench::new("dactyl::NiceU8", "from(0)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(0_u8)),
 
-    Bench::new("fyi_num::NiceU8", "from(18)")
+    Bench::new("dactyl::NiceU8", "from(18)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(18_u8)),
 
-    Bench::new("fyi_num::NiceU8", "from(101)")
+    Bench::new("dactyl::NiceU8", "from(101)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(101_u8)),
 
-    Bench::new("fyi_num::NiceU8", "from(u8::MAX)")
+    Bench::new("dactyl::NiceU8", "from(u8::MAX)")
         .timed(Duration::from_secs(1))
         .with(|| NiceU8::from(u8::MAX))
 );

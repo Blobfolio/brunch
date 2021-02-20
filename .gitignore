@@ -1,4 +1,4 @@
 **.1.gz
-/brunch/target/
 /Cargo.lock
+/doc/
 /target/
