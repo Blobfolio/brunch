@@ -8,6 +8,8 @@
 /// This will generate a `main()` function, bootstrap, and run all supplied
 /// benches. Results will be saved and printed afterward nice and neat.
 ///
+/// See the main crate documentation for more information.
+///
 /// ## Examples
 ///
 /// ```no_run

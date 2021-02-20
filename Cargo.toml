@@ -1,12 +1,25 @@
-[workspace]
-members = [ "brunch" ]
+[package]
+name = "brunch"
+version = "0.1.1"
+authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
+edition = "2018"
+description = "A simple micro-benchmark runner."
+license = "WTFPL"
+repository = "https://github.com/Blobfolio/brunch"
+readme = "README.md"
+exclude = [
+	".gitignore",
+	".righteous-sandbox.json",
+	"about.toml",
+	"doc",
+	"justfile",
+	"release",
+]
 
-[profile.bench]
-lto = true
-codegen-units = 1
-opt-level = 3
+[dependencies]
+dactyl = "0.1.*"
+serde_json = "1.0.*"
 
-[profile.release]
-lto = true
-codegen-units = 1
-opt-level = 3
+[dependencies.serde]
+version = "1.0.*"
+features = [ "derive" ]

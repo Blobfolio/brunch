@@ -17,10 +17,10 @@
 
 pkg_id      := "brunch"
 pkg_name    := "Brunch"
-pkg_dir1    := justfile_directory() + "/brunch"
 
 cargo_dir   := "/tmp/" + pkg_id + "-cargo"
 cargo_bin   := cargo_dir + "/x86_64-unknown-linux-gnu/release/" + pkg_id
+doc_dir     := justfile_directory() + "/doc"
 release_dir := justfile_directory() + "/release"
 
 rustflags   := "-C link-arg=-s"
@@ -35,14 +35,12 @@ bench BENCH="":
 	if [ -z "{{ BENCH }}" ]; then
 		RUSTFLAGS="{{ rustflags }}" cargo bench \
 			--benches \
-			--workspace \
 			--all-features \
 			--target x86_64-unknown-linux-gnu \
 			--target-dir "{{ cargo_dir }}"
 	else
 		RUSTFLAGS="{{ rustflags }}" cargo bench \
 			--bench "{{ BENCH }}" \
-			--workspace \
 			--all-features \
 			--target x86_64-unknown-linux-gnu \
 			--target-dir "{{ cargo_dir }}"
@@ -68,7 +66,6 @@ bench BENCH="":
 	# But some Cargo apps place shit in subdirectories even if
 	# they place *other* shit in the designated target dir. Haha.
 	[ ! -d "{{ justfile_directory() }}/target" ] || rm -rf "{{ justfile_directory() }}/target"
-	[ ! -d "{{ pkg_dir1 }}/target" ] || rm -rf "{{ pkg_dir1 }}/target"
 
 	cargo update -w
 
@@ -77,7 +74,6 @@ bench BENCH="":
 @clippy:
 	clear
 	RUSTFLAGS="{{ rustflags }}" cargo clippy \
-		--workspace \
 		--release \
 		--all-features \
 		--target x86_64-unknown-linux-gnu \
@@ -88,11 +84,29 @@ bench BENCH="":
 @credits:
 	# Update CREDITS.html.
 	cargo about \
-		-m "{{ pkg_dir1 }}/Cargo.toml" \
+		-m "{{ justfile_directory() }}/Cargo.toml" \
 		generate \
 		"{{ release_dir }}/credits/about.hbs" > "{{ justfile_directory() }}/CREDITS.md"
 
 	just _fix-chown "{{ justfile_directory() }}/CREDITS.md"
+
+
+# Build Docs.
+@doc:
+	# Make sure nightly is installed; this version generates better docs.
+	rustup install nightly
+
+	# Make the docs.
+	cargo +nightly doc \
+		--release \
+		--no-deps \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
+
+	# Move the docs and clean up ownership.
+	[ ! -d "{{ doc_dir }}" ] || rm -rf "{{ doc_dir }}"
+	mv "{{ cargo_dir }}/x86_64-unknown-linux-gnu/doc" "{{ justfile_directory() }}"
+	just _fix-chown "{{ doc_dir }}"
 
 
 # Unit tests!
@@ -105,7 +119,6 @@ test:
 		--tests \
 		--release \
 		--all-features \
-		--workspace \
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}" -- \
 			--format terse
@@ -118,7 +131,7 @@ version:
 	#!/usr/bin/env bash
 
 	# Current version.
-	_ver1="$( toml get "{{ pkg_dir1 }}/Cargo.toml" package.version | \
+	_ver1="$( toml get "{{ justfile_directory() }}/Cargo.toml" package.version | \
 		sed 's/"//g' )"
 
 	# Find out if we want to bump it.
@@ -132,7 +145,7 @@ version:
 	fyi success "Setting version to $_ver2."
 
 	# Set the release version!
-	just _version "{{ pkg_dir1 }}" "$_ver2"
+	just _version "{{ justfile_directory() }}" "$_ver2"
 
 
 # Set version for real.
@@ -150,8 +163,8 @@ version:
 	#rustup default nightly-2020-09-15
 	#rustup component add clippy --toolchain nightly-2020-09-15
 	[ ! -f "{{ justfile_directory() }}/Cargo.lock" ] || rm "{{ justfile_directory() }}/Cargo.lock"
-	cargo update -w
-	cargo outdated -w
+	cargo update
+	cargo outdated
 
 
 # Fix file/directory permissions.

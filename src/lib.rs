@@ -9,17 +9,22 @@ In theory, this library can reach pico-second scales (it clocks increasingly lar
 
 
 
+## Work in Progress
+
+This crate is still under heavy development. It is ~~subject to~~ going to change, so you probably don't want to rely on it in production yet. But that said, feel free to poke around, steal code, find inspiration, etc.
+
+
+
 ## Installation
 
 Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
 
 ```
-[dev-dependencies.brunch]
-git = "https://github.com/Blobfolio/brunch.git"
-tag = "v0.1.*"
+[dev-dependencies]
+brunch = "0.1.*"
 ```
 
-Benchemarks are also defined in `Cargo.toml`. Just be sure to set `harness = false`:
+Benchemarks are also defined in `Cargo.toml` the usual way. Just be sure to set `harness = false`:
 
 ```
 [[bench]]
@@ -28,9 +33,10 @@ harness = false
 ```
 
 
+
 ## Usage
 
-Setup is currently simple if primitive, requiring you drop a call to `brunch::benches!()` in the benchmark file. It will generate a `main()` method, run the supplied benchmarks, and give you the results.
+Setup is currently simple if primitive, requiring you drop a call to the [`benches`] macro in the benchmark file. It will generate a `main()` method, run the supplied benchmarks, and give you the results.
 
 An example bench file would look something like:
 
@@ -58,9 +64,9 @@ brunch::benches!(
 );
 ```
 
-The `Bench` struct represents a benchmark. It takes two label arguments intended to represent a shared base (for the included benchmarks) and the unique bit, usually a method/value.
+The [`Bench`] struct represents a benchmark. It takes two label arguments intended to represent a shared base (for the included benchmarks) and the unique bit, usually a method/value.
 
-By default, each benchmark will run for approximately three seconds. This can be changed using the chained `Bench::timed` method as shown above.
+By default, each benchmark will run for approximately three seconds. This can be changed using the chained [`Bench::timed`] method as shown above.
 
 There are currently three styles of callback:
 
@@ -70,11 +76,6 @@ There are currently three styles of callback:
 | `with_setup` | `FnMut(I) -> O` | Execute a callback seeded with a (cloneable) value. |
 | `with_setup_ref` | `FnMut(&I) -> O` | Execute a callback seeded with a referenced value. |
 
-
-
-## Work-in-Progress
-
-This is a work-in-progress, still quite messy, and subject to change.
 */
 
 #![warn(clippy::filetype_is_file)]
@@ -118,7 +119,13 @@ pub use bench::{
 	stats::Stats,
 };
 
+
+
+#[doc(hidden)]
 /// # Analyze Results.
+///
+/// This method is called by the [`benches`] macro. It is not intended to be
+/// called directly.
 pub fn analyze(benches: &mut Vec<Bench>) {
 	// Update histories.
 	let mut history = History::default();
@@ -148,7 +155,15 @@ pub fn analyze(benches: &mut Vec<Bench>) {
 	println!();
 }
 
+#[doc(hidden)]
 /// # Black Box.
+///
+/// This pseudo-black box is stolen from [`easybench`](https://crates.io/crates/easybench), which
+/// stole it from `Bencher`.
+///
+/// The gist is it mostly works, but may fail to prevent the compiler from
+/// optimizing it away in some cases. Avoiding nightly, it is the best we've
+/// got.
 pub(crate) fn black_box<T>(dummy: T) -> T {
 	unsafe {
 		let ret = std::ptr::read_volatile(&dummy);

@@ -10,6 +10,7 @@ use std::time::Duration;
 
 
 
+#[doc(hidden)]
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 /// # Stats.
 ///
@@ -18,6 +19,9 @@ use std::time::Duration;
 ///
 /// The how of the average and fit calculations borrow heavily from [`easybench`](https://crates.io/crates/easybench)
 /// as its approach works quite well!
+///
+/// This is triggered automatically when using the [`benches`] macro; it is
+/// not intended to be called manually.
 pub struct Stats {
 	pub(crate) iters: usize,
 	pub(crate) time: Duration,
