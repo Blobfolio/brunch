@@ -10,6 +10,7 @@ use std::time::Duration;
 
 
 
+#[doc(hidden)]
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 /// # Stats.
 ///

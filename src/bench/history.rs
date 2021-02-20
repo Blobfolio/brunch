@@ -16,6 +16,7 @@ use std::{
 
 
 
+#[doc(hidden)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 /// # History.
 ///

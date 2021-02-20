@@ -10,7 +10,7 @@ In theory, this library can reach pico-second scales (it clocks increasingly lar
 
 ## Work in Progress
 
-This crate is still under heavy development. It is subject to change (and almost certainly going to) so you probably don't want to rely on it in production yet. But that said, feel free to poke around, steal code, find inspiration, etc.
+This crate is still under heavy development. It is ~~subject to~~ going to change, so you probably don't want to rely on it in production yet. But that said, feel free to poke around, steal code, find inspiration, etc.
 
 
 

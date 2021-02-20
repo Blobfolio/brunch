@@ -11,7 +11,7 @@ In theory, this library can reach pico-second scales (it clocks increasingly lar
 
 ## Work in Progress
 
-This crate is still under heavy development. It is subject to change (and almost certainly going to) so you probably don't want to rely on it in production yet. But that said, feel free to poke around, steal code, find inspiration, etc.
+This crate is still under heavy development. It is ~~subject to~~ going to change, so you probably don't want to rely on it in production yet. But that said, feel free to poke around, steal code, find inspiration, etc.
 
 
 
@@ -121,6 +121,7 @@ pub use bench::{
 
 
 
+#[doc(hidden)]
 /// # Analyze Results.
 ///
 /// This method is called by the [`benches`] macro. It is not intended to be
@@ -154,6 +155,7 @@ pub fn analyze(benches: &mut Vec<Bench>) {
 	println!();
 }
 
+#[doc(hidden)]
 /// # Black Box.
 ///
 /// This pseudo-black box is stolen from [`easybench`](https://crates.io/crates/easybench), which

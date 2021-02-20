@@ -189,6 +189,7 @@ impl Bench {
 
 
 
+#[doc(hidden)]
 #[derive(Debug)]
 /// # Benchmark Result.
 ///
