@@ -18,6 +18,7 @@ exclude = [
 
 [dependencies]
 dactyl = "0.1.*"
+num-traits = "0.2.*"
 serde_json = "1.0.*"
 
 [dependencies.serde]
