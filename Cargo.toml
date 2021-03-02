@@ -16,6 +16,9 @@ exclude = [
 	"release",
 ]
 
+[package.metadata.docs.rs]
+default-target = "x86_64-unknown-linux-gnu"
+
 [dependencies]
 dactyl = "0.1.*"
 num-traits = "0.2.*"
