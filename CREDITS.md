@@ -233,7 +233,7 @@ License details for project dependencies are listed below.
 * [quote 1.0.9](https://github.com/dtolnay/quote)
 * [serde 1.0.123](https://github.com/serde-rs/serde)
 * [serde_derive 1.0.123](https://github.com/serde-rs/serde)
-* [serde_json 1.0.62](https://github.com/serde-rs/json)
+* [serde_json 1.0.64](https://github.com/serde-rs/json)
 * [syn 1.0.60](https://github.com/dtolnay/syn)
 * [unicode-xid 0.2.1](https://github.com/unicode-rs/unicode-xid)
 
@@ -447,8 +447,8 @@ limitations under the License.
 
 **Used By:**
 
-* [brunch 0.1.1](https://github.com/Blobfolio/brunch)
-* [dactyl 0.1.2](https://github.com/Blobfolio/dactyl)
+* [brunch 0.1.2](https://github.com/Blobfolio/brunch)
+* [dactyl 0.1.5](https://github.com/Blobfolio/dactyl)
 
 
 ```
