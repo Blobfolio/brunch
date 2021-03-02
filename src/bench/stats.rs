@@ -2,6 +2,8 @@
 # Brunch: Stats
 */
 
+use dactyl::traits::SaturatingFrom;
+use num_traits::cast::FromPrimitive;
 use serde::{
 	Serialize,
 	Deserialize,
@@ -44,33 +46,38 @@ impl From<&[(usize, Duration)]> for Stats {
 			fit: f64::NAN,
 		};
 
-		// Short circuit.
-		let len = src.len() as f64;
-		if len < 2.0 { return out; }
+		// Length should fit in a u32.
+		let len = u32::saturating_from(src.len());
+		if len < 2 { return out; }
+
+		// Convert to an f64.
+		let len = f64::from(len);
 
 		// Recast to floats to prevent overflow-type issues with integer division.
-		let sum_a = sum_a as f64;
-		let sum_b = sum_b.as_nanos() as f64;
+		let sum_a = f64::from_usize(sum_a).unwrap_or_default();
+		let sum_b = f64::from_u128(sum_b.as_nanos()).unwrap_or_default();
 
-		let (sq_a, sq_b, prod) = src.iter()
-			.fold((0.0_f64, 0.0_f64, 0.0_f64), |(ta, tb, tp), (a, b)| {
-				let a = *a as f64;
-				let b = b.as_nanos() as f64;
-				(
-					a.mul_add(a, ta), // Sum of A squares.
-					b.mul_add(b, tb), // Sum of B squares.
-					a.mul_add(b, tp)  // Sum of A*B.
-				)
-			});
+		if sum_a > 0.0 && sum_b > 0.0 {
+			let (sq_a, sq_b, prod) = src.iter()
+				.fold((0.0_f64, 0.0_f64, 0.0_f64), |(ta, tb, tp), (a, b)| {
+					let a = f64::from_usize(*a).unwrap_or_default();
+					let b = f64::from_u128(b.as_nanos()).unwrap_or_default();
+					(
+						a.mul_add(a, ta), // Sum of A squares.
+						b.mul_add(b, tb), // Sum of B squares.
+						a.mul_add(b, tp)  // Sum of A*B.
+					)
+				});
 
-		// Now the math.
-		let ncovar = prod - ((sum_a * sum_b) / len);
-		let nxvar = sq_a - ((sum_a * sum_a) / len);
-		let nyvar = sq_b - ((sum_b * sum_b) / len);
+			// Now the math.
+			let ncovar = prod - ((sum_a * sum_b) / len);
+			let nxvar = sq_a - ((sum_a * sum_a) / len);
+			let nyvar = sq_b - ((sum_b * sum_b) / len);
 
-		// Save the values.
-		out.fit = (ncovar * ncovar) / (nxvar * nyvar);
-		out.avg = ncovar / nxvar;
+			// Save the values.
+			out.fit = (ncovar * ncovar) / (nxvar * nyvar);
+			out.avg = ncovar / nxvar;
+		}
 
 		out
 	}

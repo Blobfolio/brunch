@@ -1,6 +1,6 @@
 [package]
 name = "brunch"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2018"
 description = "A simple micro-benchmark runner."
@@ -16,8 +16,12 @@ exclude = [
 	"release",
 ]
 
+[package.metadata.docs.rs]
+default-target = "x86_64-unknown-linux-gnu"
+
 [dependencies]
 dactyl = "0.1.*"
+num-traits = "0.2.*"
 serde_json = "1.0.*"
 
 [dependencies.serde]

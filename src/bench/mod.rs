@@ -16,9 +16,13 @@ use dactyl::{
 	NiceU32,
 	NicePercent,
 };
-use std::time::{
-	Duration,
-	Instant,
+use num_traits::cast::FromPrimitive;
+use std::{
+	convert::TryFrom,
+	time::{
+		Duration,
+		Instant,
+	},
 };
 
 
@@ -99,8 +103,8 @@ impl Bench {
 		let mut data = Vec::new();
 		let bench_start = Instant::now();
 
-		while bench_start.elapsed() < self.limit {
-			let iters = ITER_SCALE.powi(data.len() as i32).round() as usize;
+		while bench_start.elapsed() < self.limit && data.len() < 4_294_967_295 {
+			let iters = iter_count(&data);
 			let start = Instant::now();
 			for _ in 0..iters { black_box(cb()); }
 			data.push((iters, start.elapsed()));
@@ -122,9 +126,9 @@ impl Bench {
 		let mut data = Vec::new();
 		let bench_start = Instant::now();
 
-		while bench_start.elapsed() < self.limit {
+		while bench_start.elapsed() < self.limit && data.len() < 4_294_967_295 {
 			// Prepare the batch arguments in advance.
-			let iters = ITER_SCALE.powi(data.len() as i32).round() as usize;
+			let iters = iter_count(&data);
 			let mut xs = std::iter::repeat(env.clone())
 				.take(iters)
 				.collect::<Vec<I>>();
@@ -153,9 +157,9 @@ impl Bench {
 		let mut data = Vec::new();
 		let bench_start = Instant::now();
 
-		while bench_start.elapsed() < self.limit {
+		while bench_start.elapsed() < self.limit && data.len() < 4_294_967_295 {
 			// Prepare the batch arguments in advance.
-			let iters = ITER_SCALE.powi(data.len() as i32).round() as usize;
+			let iters = iter_count(&data);
 			let xs = std::iter::repeat(&env).take(iters);
 
 			let start = Instant::now();
@@ -335,6 +339,19 @@ impl BenchResult {
 
 
 
+/// # Iter Count.
+///
+/// This will calculate the number of iterations to perform before checking the
+/// time. The value will always fall within the `u32` range to make
+/// cross-casting safer.
+fn iter_count<T>(src: &[T]) -> usize {
+	usize::from_f64(
+		ITER_SCALE.powi(i32::try_from(src.len()).unwrap_or(i32::MAX)).round()
+	)
+		.unwrap_or(usize::MAX)
+		.min(4_294_967_295 - src.len())
+}
+
 /// # Format w/ Unit.
 ///
 /// Give us a nice comma-separated integer with two decimal places and an
@@ -342,8 +359,8 @@ impl BenchResult {
 fn format_time(time: f64, unit: &str) -> String {
 	format!(
 		"\x1b[1m{}.{:02} {}\x1b[0m",
-		NiceU32::from(time.trunc() as u32).as_str(),
-		f64::floor(time.fract() * 100.0) as u32,
+		NiceU32::from(u32::from_f64(time.trunc()).unwrap_or_default()).as_str(),
+		u32::from_f64(f64::floor(time.fract() * 100.0)).unwrap_or_default(),
 		unit
 	)
 }

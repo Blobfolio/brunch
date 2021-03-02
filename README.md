@@ -42,7 +42,7 @@ Setup is currently simple if primitive, requiring you drop a call to `brunch::be
 
 An example bench file would look something like:
 
-```
+```rust
 use brunch::Bench;
 use dactyl::NiceU8;
 use std::time::Duration;
