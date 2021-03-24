@@ -10,6 +10,7 @@ readme = "README.md"
 exclude = [
 	".gitignore",
 	".righteous-sandbox.json",
+	".travis.yml",
 	"about.toml",
 	"doc",
 	"justfile",
