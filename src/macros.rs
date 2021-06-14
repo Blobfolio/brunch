@@ -15,11 +15,17 @@
 /// ```no_run
 /// use brunch::{Bench, benches};
 ///
+/// // Example benchmark adding 2+2.
+/// fn callback() -> Option<usize> { 2_usize.checked_add(2) }
+///
+/// // Example benchmark multiplying 2x2.
+/// fn callback2() -> Option<usize> { 2_usize.checked_mul(2) }
+///
 /// benches!(
-///     Bench::new("some_class", "some_method(x)")
+///     Bench::new("usize", "checked_add(2)")
 ///         .with(callback),
-///     Bench::new("other_class", "other_method(x)")
-///         .with(callback)
+///     Bench::new("usize", "checked_mul(2)")
+///         .with(callback2)
 /// );
 /// ```
 macro_rules! benches {

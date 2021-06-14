@@ -94,7 +94,7 @@ bench BENCH="":
 # Build Docs.
 @doc:
 	# Make sure nightly is installed; this version generates better docs.
-	rustup install nightly
+	env RUSTUP_PERMIT_COPY_RENAME=true rustup install nightly
 
 	# Make the docs.
 	cargo +nightly doc \
@@ -110,20 +110,12 @@ bench BENCH="":
 
 
 # Unit tests!
-test:
-	#!/usr/bin/env bash
-
+@test:
 	clear
-
-	RUST_TEST_THREADS=1 cargo test \
-		--tests \
+	cargo test \
 		--release \
-		--all-features \
 		--target x86_64-unknown-linux-gnu \
-		--target-dir "{{ cargo_dir }}" -- \
-			--format terse
-
-	exit 0
+		--target-dir "{{ cargo_dir }}"
 
 
 # Get/Set version.
@@ -156,15 +148,6 @@ version:
 	toml set "{{ DIR }}/Cargo.toml" package.version "{{ VER }}" > /tmp/Cargo.toml
 	just _fix-chown "/tmp/Cargo.toml"
 	mv "/tmp/Cargo.toml" "{{ DIR }}/Cargo.toml"
-
-
-# Init dependencies.
-@_init:
-	#rustup default nightly-2020-09-15
-	#rustup component add clippy --toolchain nightly-2020-09-15
-	[ ! -f "{{ justfile_directory() }}/Cargo.lock" ] || rm "{{ justfile_directory() }}/Cargo.lock"
-	cargo update
-	cargo outdated
 
 
 # Fix file/directory permissions.

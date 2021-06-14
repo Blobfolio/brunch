@@ -60,7 +60,7 @@ impl History {
 	/// test is re-run.
 	pub fn save(&self) {
 		if let Ok(mut out) = File::create(Self::path()) {
-			let _ = serde_json::to_writer(&mut out, &self);
+			let _res = serde_json::to_writer(&mut out, &self);
 		}
 	}
 }

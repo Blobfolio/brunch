@@ -19,14 +19,14 @@ This crate is still under heavy development. It is ~~subject to~~ going to chang
 
 Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
 
-```
+```ignore
 [dev-dependencies]
 brunch = "0.1.*"
 ```
 
 Benchemarks are also defined in `Cargo.toml` the usual way. Just be sure to set `harness = false`:
 
-```
+```ignore
 [[bench]]
 name = "encode"
 harness = false

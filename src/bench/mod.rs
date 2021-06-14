@@ -51,6 +51,10 @@ impl Bench {
 	/// Instantiate a new benchmark with a namespace and name. These values
 	/// — i.e. `namespace::name` — should be unique for each specific
 	/// benchmark or historical comparisons will be muffed.
+	///
+	/// ## Panics
+	///
+	/// This method will panic if the namespace or name are empty.
 	pub fn new<S>(namespace: S, name: S) -> Self
 	where S: AsRef<str> {
 		let namespace = namespace.as_ref();
