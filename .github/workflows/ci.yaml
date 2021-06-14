@@ -63,4 +63,3 @@ jobs:
     - name: Tests
       run: |
         cargo test --release --all-features --target ${{ matrix.target }}
-        cargo test --release --all-features --target ${{ matrix.target }} -- --ignored
