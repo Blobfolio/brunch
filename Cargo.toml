@@ -8,9 +8,9 @@ license = "WTFPL"
 repository = "https://github.com/Blobfolio/brunch"
 readme = "README.md"
 exclude = [
+	".github",
 	".gitignore",
 	".righteous-sandbox.json",
-	".travis.yml",
 	"about.toml",
 	"doc",
 	"justfile",
