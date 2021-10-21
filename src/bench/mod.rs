@@ -17,12 +17,9 @@ use dactyl::{
 	NicePercent,
 };
 use num_traits::cast::FromPrimitive;
-use std::{
-	convert::TryFrom,
-	time::{
-		Duration,
-		Instant,
-	},
+use std::time::{
+	Duration,
+	Instant,
 };
 
 
