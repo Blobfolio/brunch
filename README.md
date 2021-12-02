@@ -25,7 +25,7 @@ Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
 
 ```
 [dev-dependencies]
-brunch = "0.1.*"
+brunch = "0.2.*"
 ```
 
 Benchemarks are also defined in `Cargo.toml` the usual way. Just be sure to set `harness = false`:
