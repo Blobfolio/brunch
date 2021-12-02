@@ -6,6 +6,7 @@ License details for project dependencies are listed below.
 
 * Apache License 2.0 (3)
 * Do What The F*ck You Want To Public License (1)
+
 ## Complete Licenses:
 
 ### Apache License 2.0
@@ -13,6 +14,7 @@ License details for project dependencies are listed below.
 **Used By:**
 
 * [ryu 1.0.6](https://github.com/dtolnay/ryu)
+
 ```
                                  Apache License
                            Version 2.0, January 2004
@@ -231,6 +233,7 @@ License details for project dependencies are listed below.
 * [serde_json 1.0.72](https://github.com/serde-rs/json)
 * [syn 1.0.82](https://github.com/dtolnay/syn)
 * [unicode-xid 0.2.2](https://github.com/unicode-rs/unicode-xid)
+
 ```
                               Apache License
                         Version 2.0, January 2004
@@ -441,6 +444,7 @@ limitations under the License.
 **Used By:**
 
 * [unicode-xid 0.2.2](https://github.com/unicode-rs/unicode-xid)
+
 ```
 Licensed under the Apache License, Version 2.0
 <LICENSE-APACHE or
@@ -458,6 +462,7 @@ according to those terms.
 
 * [brunch 0.2.1](https://github.com/Blobfolio/brunch)
 * [dactyl 0.2.0](https://github.com/Blobfolio/dactyl)
+
 ```
 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 Version 2, December 2004

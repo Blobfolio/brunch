@@ -82,6 +82,7 @@ There are currently three styles of callback:
 #![allow(clippy::module_name_repetitions)]
 
 
+
 mod bench;
 #[macro_use]
 mod macros;
