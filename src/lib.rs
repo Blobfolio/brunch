@@ -15,25 +15,6 @@ This crate is still under heavy development. It is ~~subject to~~ going to chang
 
 
 
-## Installation
-
-Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
-
-```ignore
-[dev-dependencies]
-brunch = "0.1.*"
-```
-
-Benchemarks are also defined in `Cargo.toml` the usual way. Just be sure to set `harness = false`:
-
-```ignore
-[[bench]]
-name = "encode"
-harness = false
-```
-
-
-
 ## Usage
 
 Setup is currently simple if primitive, requiring you drop a call to the [`benches`] macro in the benchmark file. It will generate a `main()` method, run the supplied benchmarks, and give you the results.
@@ -99,7 +80,6 @@ There are currently three styles of callback:
 #![warn(unused_import_braces)]
 
 #![allow(clippy::module_name_repetitions)]
-
 
 
 mod bench;

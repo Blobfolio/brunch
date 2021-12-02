@@ -84,8 +84,8 @@ bench BENCH="":
 @credits:
 	# Update CREDITS.html.
 	cargo about \
-		-m "{{ justfile_directory() }}/Cargo.toml" \
 		generate \
+		-m "{{ justfile_directory() }}/Cargo.toml" \
 		"{{ release_dir }}/credits/about.hbs" > "{{ justfile_directory() }}/CREDITS.md"
 
 	just _fix-chown "{{ justfile_directory() }}/CREDITS.md"

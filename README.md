@@ -3,6 +3,7 @@
 [![Documentation](https://docs.rs/brunch/badge.svg)](https://docs.rs/brunch/)
 [![crates.io](https://img.shields.io/crates/v/brunch.svg)](https://crates.io/crates/brunch)
 [![Build Status](https://github.com/Blobfolio/brunch/workflows/Build/badge.svg)](https://github.com/Blobfolio/brunch/actions)
+[![Dependency Status](https://deps.rs/repo/github/blobfolio/brunch/status.svg)](https://deps.rs/repo/github/blobfolio/brunch
 
 `Brunch` is a very simple Rust micro-benchmark runner inspired by [`easybench`](https://crates.io/crates/easybench). It has roughly a million times fewer dependencies than [`criterion`](https://crates.io/crates/criterion), does not require nightly, and maintains a "last run" state so can show relative changes benchmark-to-benchmark. The formatting is also quite pretty.
 
@@ -24,7 +25,7 @@ Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
 
 ```
 [dev-dependencies]
-brunch = "0.1.*"
+brunch = "0.2.*"
 ```
 
 Benchemarks are also defined in `Cargo.toml` the usual way. Just be sure to set `harness = false`:

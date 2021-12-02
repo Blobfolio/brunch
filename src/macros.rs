@@ -29,7 +29,7 @@
 /// );
 /// ```
 macro_rules! benches {
-	($($benches:expr),+) => {
+	($($benches:expr),+ $(,)?) => {
 		/// # Benchmarks!
 		fn main() {
 			// This can take a while; give 'em a message of hope.

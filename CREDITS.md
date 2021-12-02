@@ -4,19 +4,15 @@ License details for project dependencies are listed below.
 
 ## Overview of Licenses:
 
-* Apache License 2.0 (2)
+* Apache License 2.0 (3)
 * Do What The F*ck You Want To Public License (1)
-
-
 ## Complete Licenses:
 
 ### Apache License 2.0
 
 **Used By:**
 
-* [ryu 1.0.5](https://github.com/dtolnay/ryu)
-
-
+* [ryu 1.0.6](https://github.com/dtolnay/ryu)
 ```
                                  Apache License
                            Version 2.0, January 2004
@@ -226,18 +222,15 @@ License details for project dependencies are listed below.
 
 **Used By:**
 
-* [itoa 0.4.7](https://github.com/dtolnay/itoa)
-* [num-integer 0.1.44](https://github.com/rust-num/num-integer)
+* [itoa 0.4.8](https://github.com/dtolnay/itoa)
 * [num-traits 0.2.14](https://github.com/rust-num/num-traits)
-* [proc-macro2 1.0.24](https://github.com/alexcrichton/proc-macro2)
-* [quote 1.0.9](https://github.com/dtolnay/quote)
-* [serde 1.0.123](https://github.com/serde-rs/serde)
-* [serde_derive 1.0.123](https://github.com/serde-rs/serde)
-* [serde_json 1.0.64](https://github.com/serde-rs/json)
-* [syn 1.0.60](https://github.com/dtolnay/syn)
-* [unicode-xid 0.2.1](https://github.com/unicode-rs/unicode-xid)
-
-
+* [proc-macro2 1.0.32](https://github.com/dtolnay/proc-macro2)
+* [quote 1.0.10](https://github.com/dtolnay/quote)
+* [serde 1.0.130](https://github.com/serde-rs/serde)
+* [serde_derive 1.0.130](https://github.com/serde-rs/serde)
+* [serde_json 1.0.72](https://github.com/serde-rs/json)
+* [syn 1.0.82](https://github.com/dtolnay/syn)
+* [unicode-xid 0.2.2](https://github.com/unicode-rs/unicode-xid)
 ```
                               Apache License
                         Version 2.0, January 2004
@@ -443,14 +436,28 @@ limitations under the License.
 
 ```
 
+### Apache License 2.0
+
+**Used By:**
+
+* [unicode-xid 0.2.2](https://github.com/unicode-rs/unicode-xid)
+```
+Licensed under the Apache License, Version 2.0
+<LICENSE-APACHE or
+http://www.apache.org/licenses/LICENSE-2.0> or the MIT
+license <LICENSE-MIT or http://opensource.org/licenses/MIT>,
+at your option. All files in the project carrying such
+notice may not be copied, modified, or distributed except
+according to those terms.
+
+```
+
 ### Do What The F*ck You Want To Public License
 
 **Used By:**
 
-* [brunch 0.1.2](https://github.com/Blobfolio/brunch)
-* [dactyl 0.1.5](https://github.com/Blobfolio/dactyl)
-
-
+* [brunch 0.2.1](https://github.com/Blobfolio/brunch)
+* [dactyl 0.2.0](https://github.com/Blobfolio/dactyl)
 ```
 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 Version 2, December 2004
@@ -467,6 +474,5 @@ TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 0. You just DO WHAT THE FUCK YOU WANT TO.
 
 ```
-
 
 
