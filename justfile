@@ -82,12 +82,8 @@ bench BENCH="":
 
 # Generate CREDITS.
 @credits:
-	# Update CREDITS.html.
-	cargo about \
-		generate \
-		-m "{{ justfile_directory() }}/Cargo.toml" \
-		"{{ release_dir }}/credits/about.hbs" > "{{ justfile_directory() }}/CREDITS.md"
-
+	# Do completions/man.
+	cargo bashman --no-bash --no-man
 	just _fix-chown "{{ justfile_directory() }}/CREDITS.md"
 
 
