@@ -29,7 +29,7 @@ const ITER_SCALE: f64 = 1.1;
 
 
 
-#[allow(missing_debug_implementations)]
+#[derive(Debug)]
 /// # Benchmark.
 ///
 /// This struct holds a single "bench" you wish to run. See the main crate
@@ -81,7 +81,6 @@ impl Bench {
 		self
 	}
 
-	#[allow(clippy::cast_possible_wrap)]
 	/// # With Callback.
 	///
 	/// Run a benchmark that does not take any arguments.
@@ -118,7 +117,6 @@ impl Bench {
 		self
 	}
 
-	#[allow(clippy::cast_possible_wrap)]
 	/// # With Callback.
 	///
 	/// Run a benchmark that takes a value by value.
@@ -148,7 +146,6 @@ impl Bench {
 		self
 	}
 
-	#[allow(clippy::cast_possible_wrap)]
 	/// # With Callback.
 	///
 	/// Run a benchmark that takes a value by reference.
