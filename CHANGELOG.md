@@ -1,16 +1,24 @@
 # Changelog
 
 
+## [0.2.2](https://github.com/Blobfolio/brunch/releases/tag/v0.2.2) - 2022-01-13
+
+### Changed
+
+* Updated docs;
+* Cleaned up lint overrides;
+
+
 
 ## [0.2.1](https://github.com/Blobfolio/brunch/releases/tag/v0.2.1) - 2021-12-02
 
 ### Added
 
-- A demo benchmark (`fn_fib`).
+* A demo benchmark (`fn_fib`).
 
 ### Changed
 
-- The list passed to the `brunch::benches!` macro may now include a trailing comma.
+* The list passed to the `brunch::benches!` macro may now include a trailing comma.
 
 
 
@@ -18,8 +26,8 @@
 
 ### Added
 
-- This changelog! Haha.
+* This changelog! Haha.
 
 ### Changed
 
-- Use Rust edition 2021.
+* Use Rust edition 2021.

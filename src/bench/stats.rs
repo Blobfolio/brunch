@@ -33,7 +33,6 @@ pub struct Stats {
 
 #[allow(clippy::similar_names)]
 impl From<&[(usize, Duration)]> for Stats {
-	#[allow(clippy::suspicious_operation_groupings)] // You don't know me.
 	fn from(src: &[(usize, Duration)]) -> Self {
 		// Sums.
 		let (sum_a, sum_b) = src.iter()
@@ -71,11 +70,11 @@ impl From<&[(usize, Duration)]> for Stats {
 
 			// Now the math.
 			let ncovar = prod - ((sum_a * sum_b) / len);
-			let nxvar = sq_a - ((sum_a * sum_a) / len);
-			let nyvar = sq_b - ((sum_b * sum_b) / len);
+			let nxvar = sq_a - (sum_a.powi(2) / len);
+			let nyvar = sq_b - (sum_b.powi(2) / len);
 
 			// Save the values.
-			out.fit = (ncovar * ncovar) / (nxvar * nyvar);
+			out.fit = ncovar.powi(2) / (nxvar * nyvar);
 			out.avg = ncovar / nxvar;
 		}
 
