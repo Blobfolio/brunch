@@ -43,6 +43,7 @@ pub struct Bench {
 }
 
 impl Bench {
+	#[must_use]
 	/// # New.
 	///
 	/// Instantiate a new benchmark with a namespace and name. These values
@@ -81,6 +82,7 @@ impl Bench {
 		self
 	}
 
+	#[must_use]
 	/// # With Callback.
 	///
 	/// Run a benchmark that does not take any arguments.
@@ -117,6 +119,7 @@ impl Bench {
 		self
 	}
 
+	#[must_use]
 	/// # With Callback.
 	///
 	/// Run a benchmark that takes a value by value.
@@ -146,6 +149,7 @@ impl Bench {
 		self
 	}
 
+	#[must_use]
 	/// # With Callback.
 	///
 	/// Run a benchmark that takes a value by reference.
