@@ -102,6 +102,8 @@ impl Bench {
 	/// ```
 	pub fn with<F, O>(mut self, mut cb: F) -> Self
 	where F: FnMut() -> O {
+		if self.is_spacer() { return self; }
+
 		let mut data = Vec::new();
 		let bench_start = Instant::now();
 
@@ -125,6 +127,8 @@ impl Bench {
 	/// Run a benchmark that takes a value by value.
 	pub fn with_setup<F, I, O>(mut self, env: I, mut cb: F) -> Self
 	where F: FnMut(I) -> O, I: Clone {
+		if self.is_spacer() { return self; }
+
 		let mut data = Vec::new();
 		let bench_start = Instant::now();
 
@@ -155,6 +159,8 @@ impl Bench {
 	/// Run a benchmark that takes a value by reference.
 	pub fn with_setup_ref<F, I, O>(mut self, env: I, mut cb: F) -> Self
 	where F: FnMut(&I) -> O, I: Clone {
+		if self.is_spacer() { return self; }
+
 		//let mut gen_env = move || env.clone();
 		let mut data = Vec::new();
 		let bench_start = Instant::now();
@@ -177,6 +183,46 @@ impl Bench {
 		self.stats = Some(Stats::from(&data[..]));
 
 		self
+	}
+
+	#[must_use]
+	/// # Spacer.
+	///
+	/// This will render as a linebreak when printing results, useful if you
+	/// want to add visual separation between two different benchmarks.
+	///
+	/// ## Examples
+	///
+	/// ```no_run
+	/// use brunch::Bench;
+	/// use dactyl::{NiceU8, NiceU16};
+	///
+	/// brunch::benches!(
+    ///     Bench::new("dactyl::NiceU8", "from(0)")
+    ///         .with(|| NiceU8::from(0_u8)),
+    ///
+    ///     Bench::spacer(),
+    ///
+    ///     Bench::new("dactyl::NiceU16", "from(0)")
+    ///         .with(|| NiceU16::from(0_u16)),
+    /// );
+	/// ```
+	pub fn spacer() -> Self {
+		Self {
+			namespace: String::new(),
+			name: String::new(),
+			limit: Duration::default(),
+			stats: None,
+			last: None,
+		}
+	}
+
+	/// # Is Spacer?
+	fn is_spacer(&self) -> bool {
+		self.namespace.is_empty() &&
+		self.name.is_empty() &&
+		self.stats.is_none() &&
+		self.last.is_none()
 	}
 
 	/// # Update History.
@@ -210,6 +256,15 @@ pub struct BenchResult {
 
 impl From<&Bench> for BenchResult {
 	fn from(src: &Bench) -> Self {
+		if src.is_spacer() {
+			return Self {
+				caller: String::new(),
+				time: String::new(),
+				diff: String::new(),
+				error: None
+			};
+		}
+
 		// The caller.
 		let caller = format!("\x1b[2m{}::\x1b[0m{}", src.namespace, src.name);
 
@@ -296,12 +351,23 @@ impl From<&Bench> for BenchResult {
 }
 
 impl BenchResult {
+	/// # Is Spacer?
+	fn is_spacer(&self) -> bool {
+		self.caller.is_empty() &&
+		self.time.is_empty() &&
+		self.diff.is_empty() &&
+		self.error.is_none()
+	}
+
 	#[must_use]
 	/// # Get Part Lengths.
 	///
 	/// This is used to size the columns from multiple results neatly.
 	pub fn lens(&self) -> (usize, usize, usize) {
-		if self.error.is_some() {
+		if self.is_spacer() {
+			(0, 0, 0)
+		}
+		else if self.error.is_some() {
 			(self.caller.len(), 0, 0)
 		}
 		else {
@@ -314,6 +380,11 @@ impl BenchResult {
 	/// This will print results, padding each column according to the lengths
 	/// passed to it.
 	pub fn print(&self, c1: usize, c2: usize, c3: usize) {
+		if self.is_spacer() {
+			println!();
+			return;
+		}
+
 		// Errors don't need to worry about spacing.
 		if let Some(e) = self.error {
 			println!("{}   \x1b[1;38;5;208m{}\x1b[0m", self.caller, e);

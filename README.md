@@ -80,6 +80,38 @@ There are currently three styles of callback:
 | `with_setup` | `FnMut(I) -> O` | Execute a callback seeded with a (cloneable) value. |
 | `with_setup_ref` | `FnMut(&I) -> O` | Execute a callback seeded with a referenced value. |
 
+The benchmarks are run in the order entered, and their results likewise follow that same ordering.
+
+If you want to break up the results visually, you can add a call to `Bench::spacer` anywhere you want a break to occur, like:
+
+```rust
+brunch::benches!(
+    Bench::new("dactyl::NiceU8", "from(0)")
+        .with(|| NiceU8::from(0_u8)),
+
+    Bench::new("dactyl::NiceU8", "from(18)")
+        .with(|| NiceU8::from(18_u8)),
+
+    Bench::spacer(),
+
+    Bench::new("dactyl::NiceU16", "from(0)")
+        .with(|| NiceU16::from(0_u16)),
+
+    Bench::new("dactyl::NiceU16", "from(18)")
+        .with(|| NiceU16::from(18_u16))
+);
+```
+
+The above would give you a result readout like:
+
+```text
+dactyl::NiceU8::from(0)     2.36 ns   
+dactyl::NiceU8::from(18)    1.92 ns   
+
+dactyl::NiceU16::from(0)    4.46 ns   
+dactyl::NiceU16::from(18)   4.47 ns
+```
+
 
 
 ## License
