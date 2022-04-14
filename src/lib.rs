@@ -102,7 +102,7 @@ pub use bench::{
 ///
 /// This method is called by the [`benches`] macro. It is not intended to be
 /// called directly.
-pub fn analyze(benches: &mut Vec<Bench>) {
+pub fn analyze(benches: &mut [Bench]) {
 	// Update histories.
 	let mut history = History::default();
 	benches.iter_mut().for_each(|x| x.history(&mut history));
@@ -125,9 +125,7 @@ pub fn analyze(benches: &mut Vec<Bench>) {
 		});
 
 	// Print the successes!
-	results.iter()
-		.for_each(|x| x.print(c1, c2, c3));
-
+	results.iter().for_each(|x| x.print(c1, c2, c3));
 	println!();
 }
 
