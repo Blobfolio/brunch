@@ -37,7 +37,7 @@ jobs:
       RUSTFLAGS: "-D warnings"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
@@ -58,8 +58,8 @@ jobs:
 
     - name: Clippy
       run: |
-        cargo clippy --release --all-features --target ${{ matrix.target }}
+        cargo clippy --release --target ${{ matrix.target }}
 
     - name: Tests
       run: |
-        cargo test --release --all-features --target ${{ matrix.target }}
+        cargo test --release --target ${{ matrix.target }}
