@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [0.2.5](https://github.com/Blobfolio/brunch/releases/tag/v0.2.5) - 2022-04-12
+
+### Fixed
+
+* Enable `num-traits` crate feature `i128` (needed for some targets).
+
+
+
 ## [0.2.4](https://github.com/Blobfolio/brunch/releases/tag/v0.2.4) - 2022-03-20
 
 ### Added
