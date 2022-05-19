@@ -135,14 +135,14 @@ impl Bench {
 		while bench_start.elapsed() < self.limit && data.len() < 4_294_967_295 {
 			// Prepare the batch arguments in advance.
 			let iters = iter_count(&data);
-			let mut xs = std::iter::repeat(env.clone())
+			let xs = std::iter::repeat(env.clone())
 				.take(iters)
 				.collect::<Vec<I>>();
 
 			let start = Instant::now();
 			// There appears to be less overhead from draining a collected Vec
 			// than simply ForEaching the Take directly.
-			xs.drain(..).for_each(|x| { black_box(cb(x)); });
+			for x in xs { black_box(cb(x)); };
 			data.push((iters, start.elapsed()));
 		}
 
