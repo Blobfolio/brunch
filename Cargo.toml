@@ -12,7 +12,6 @@ exclude = [
 	".github",
 	".gitignore",
 	".righteous-sandbox.json",
-	"about.toml",
 	"doc",
 	"justfile",
 	"release",
