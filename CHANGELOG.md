@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [0.2.6](https://github.com/Blobfolio/brunch/releases/tag/v0.2.6) - 2022-04-12
+## [0.2.6](https://github.com/Blobfolio/brunch/releases/tag/v0.2.6) - 2022-06-18
 
 ### Misc
 
