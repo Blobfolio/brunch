@@ -1,6 +1,6 @@
 [package]
 name = "brunch"
-version = "0.2.6"
+version = "0.3.0"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.61"
@@ -28,16 +28,15 @@ credits-dir = "./"
 
 [dependencies]
 dactyl = "0.4.*"
+quantogram = "=0.4.4"
+serde = "1.0.*"
 serde_json = "1.0.*"
+unicode-width = "0.1.*"
 
 [dependencies.num-traits]
 version = "0.2.*"
 default-features = false
 features = [ "std", "i128" ]
-
-[dependencies.serde]
-version = "1.0.*"
-features = [ "derive" ]
 
 [[bench]]
 name = "fn_fib"

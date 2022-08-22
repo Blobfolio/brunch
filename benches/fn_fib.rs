@@ -6,7 +6,6 @@ use brunch::{
 	Bench,
 	benches,
 };
-use std::time::Duration;
 
 
 
@@ -47,11 +46,9 @@ fn fibonacci_loop(len: usize) -> Vec<u32> {
 }
 
 benches!(
-	Bench::new("fibonacci_recursive", "(30)")
-		.timed(Duration::from_secs(1))
-		.with(|| fibonacci_recursive(30_usize)),
+	Bench::new("fibonacci_recursive(30)")
+		.run(|| fibonacci_recursive(30_usize)),
 
-	Bench::new("fibonacci_loop", "(30)")
-		.timed(Duration::from_secs(1))
-		.with(|| fibonacci_loop(30_usize)),
+	Bench::new("fibonacci_loop(30)")
+		.run(|| fibonacci_loop(30_usize)),
 );
