@@ -1,56 +1,171 @@
 /*!
 # Brunch
 
-`Brunch` is a very simple Rust micro-benchmark runner inspired by [`easybench`](https://crates.io/crates/easybench). It has roughly a million times fewer dependencies than [`criterion`](https://crates.io/crates/criterion), does not require nightly, and maintains a "last run" state so can show relative changes benchmark-to-benchmark. The formatting is also quite pretty.
+[![Documentation](https://docs.rs/brunch/badge.svg)](https://docs.rs/brunch/)
+[![crates.io](https://img.shields.io/crates/v/brunch.svg)](https://crates.io/crates/brunch)
+[![Build Status](https://github.com/Blobfolio/brunch/workflows/Build/badge.svg)](https://github.com/Blobfolio/brunch/actions)
+[![Dependency Status](https://deps.rs/repo/github/blobfolio/brunch/status.svg)](https://deps.rs/repo/github/blobfolio/brunch)
 
-As with all Rust benchmarking, there are a lot of caveats, and results might be artificially fast or slow. For best resuilts, build optimized, avoid heavy setup contexts, and test different bench setups to find the most "honest" representation.
 
-In theory, this library can reach pico-second scales (it clocks increasingly large batches and divides accordingly), but background noise and setup overhead will likely prevent times getting quite as low as they might "actually" be. It can go as long as milliseconds, but might require increased time limits to reach sufficient samples in such cases.
+
+
+`Brunch` is a very simple Rust micro-benchmark runner inspired by [`easybench`](https://crates.io/crates/easybench). It has roughly a million times fewer dependencies than [`criterion`](https://crates.io/crates/criterion), does not require nightly, and maintains a "last run" state so can show relative changes benchmark-to-benchmark.
+
+The formatting is also quite pretty.
+
+As with all Rust benchmarking, there are a lot of caveats, and results might be artificially fast or slow. For best results:
+* build optimized;
+* collect lots of samples;
+* repeat identical runs to get a feel for the natural variation;
+
+`Brunch` cannot measure time below the level of a nanosecond, so if you're trying to benchmark methods that are _really_ fast, you may need to wrap them in a method that runs through several iterations at once. For example:
+
+```no_run
+use brunch::Bench;
+
+///# Generate Strings to Test.
+fn string_seeds() -> Vec<String> {
+    (0..10_000_usize).into_iter()
+        .map(|i| "x".repeat(i))
+        .collect()
+}
+
+///# Generate Strings to Test.
+fn byte_seeds() -> Vec<Vec<u8>> {
+    (0..10_000_usize).into_iter()
+        .map(|i| "x".repeat(i).into_bytes())
+        .collect()
+}
+
+brunch::benches!(
+    Bench::new("String::len(_)")
+        .run_seeded_with(string_seeds, |vals| {
+            let mut len: usize = 0;
+            for v in vals {
+                len += v.len();
+            }
+            len
+        }),
+    Bench::new("Vec::len(_)")
+        .run_seeded_with(byte_seeds, |vals| {
+            let mut len: usize = 0;
+            for v in vals {
+                len += v.len();
+            }
+            len
+        }),
+);
+```
+
+
+
+## Cargo.toml
+
+Benchmarks are defined the usual way. Just be sure to set `harness = false`:
+
+```ignore
+[[bench]]
+name = "encode"
+harness = false
+```
+
+The following optional environmental variables are supported:
+
+* `NO_BRUNCH_HISTORY`: don't save or load run-to-run history data;
+* `BRUNCH_DIR=/some/directory`: save run-to-run history data to this folder instead of [`std::env::temp_dir`];
 
 
 
 ## Usage
 
-Setup is currently simple if primitive, requiring you drop a call to the [`benches`] macro in the benchmark file. It will generate a `main()` method, run the supplied benchmarks, and give you the results.
+The heart of `Brunch` is the [`Bench`] struct, which defines a single benchmark. There isn't much configuration required, but each [`Bench`] has the following:
 
-An example bench file would look something like:
+| Data | Description | Default |
+| ---- | ----------- | ------- |
+| Name | A unique identifier, ideally a string representation of the call itself, like `foo::bar(10)` | |
+| Samples | The number of samples to collect. | 2500 |
+| Timeout | A cutoff time to keep it from running forever. | 10 seconds |
+| Method | A method to run over and over again! | |
 
-```
+The struct uses builder-style methods to allow everything to be set in a single chain. You always need to start with [`Bench::new`] and end with one of the runner methods — [`Bench::run`], [`Bench::run_seeded`], or [`Bench::run_seeded_with`]. If you want to change the sample or timeout limits, you can add [`Bench::with_samples`] or [`Bench::with_timeout`] in between.
+
+There is also a special [`Bench::spacer`] method that can be used to inject a linebreak into the results. See below for an example.
+
+### Examples
+
+In terms of running benchmarks, the simplest approach is to use the provided [`benches`] macro. That generates the required `main()` method, runs all the benches, and prints the results automatically.
+
+```no_run
 use brunch::Bench;
 use dactyl::NiceU8;
-use std::time::Duration;
+
+/// # Silly seed method.
+fn max_u8() -> u8 { u8::MAX }
 
 brunch::benches!(
-    Bench::new("dactyl::NiceU8", "from(0)")
-        .timed(Duration::from_secs(1))
-        .with(|| NiceU8::from(0_u8)),
+    // Self-contained bench.
+    Bench::new("dactyl::NiceU8::from(0)")
+        .run(|| NiceU8::from(0_u8)),
 
-    Bench::new("dactyl::NiceU8", "from(18)")
-        .timed(Duration::from_secs(1))
-        .with(|| NiceU8::from(18_u8)),
+    // Clone-seeded bench.
+    Bench::new("dactyl::NiceU8::from(18)")
+        .run_seeded(18_u8, |num| NiceU8::from(num)),
 
-    Bench::new("dactyl::NiceU8", "from(101)")
-        .timed(Duration::from_secs(1))
-        .with(|| NiceU8::from(101_u8)),
+    // An example of a spacer, which just adds a line break.
+    Bench::spacer(),
 
-    Bench::new("dactyl::NiceU8", "from(u8::MAX)")
-        .timed(Duration::from_secs(1))
-        .with(|| NiceU8::from(u8::MAX))
+    // Callback-seeded bench.
+    Bench::new("dactyl::NiceU8::from(101)")
+        .run_seeded_with(max_u8, |num| NiceU8::from(num)),
 );
 ```
 
-The [`Bench`] struct represents a benchmark. It takes two label arguments intended to represent a shared base (for the included benchmarks) and the unique bit, usually a method/value.
+If you prefer to handle things manually, you'll need to use the [`Benches`] struct instead. It's pretty easy too:
 
-By default, each benchmark will run for approximately three seconds. This can be changed using the chained [`Bench::timed`] method as shown above.
+```no_run
+use brunch::{Benches, Bench};
+use dactyl::NiceU8;
 
-There are currently three styles of callback:
+fn main() {
+    // Do any setup you want.
+    println!("This prints before any time-consuming work happens!");
 
-| Method | Signature | Description |
-| ------ | --------- | ----------- |
-| `with` | `FnMut() -> O` | Execute a self-contained callback. |
-| `with_setup` | `FnMut(I) -> O` | Execute a callback seeded with a (cloneable) value. |
-| `with_setup_ref` | `FnMut(&I) -> O` | Execute a callback seeded with a referenced value. |
+    // Initialize a mutable `Benches`.
+    let mut benches = Benches::default();
 
+    // Push each `Bench` you have to it, one at a time (or use
+    // `benches.extend([Bench1, Bench2, ...])` to do many at once).
+    benches.push(
+        Bench::new("dactyl::NiceU8::from(0)").run(|| NiceU8::from(0_u8))
+    );
+
+    // Call the `finish` method to crunch and print the results.
+    benches.finish();
+
+    // Do something else if you want to!
+}
+```
+
+
+
+## Interpreting Results
+
+If you run the example benchmark for this crate, you should see a summary like the following:
+
+```ignore
+Method                         Mean    Change        Samples
+------------------------------------------------------------
+fibonacci_recursive(30)     2.22 ms    +1.02%    2,408/2,500
+fibonacci_loop(30)         56.17 ns       ---    2,499/2,500
+```
+
+The _Method_ column speaks for itself, but the numbers deserve a little explanation:
+
+| Column | Description |
+| ------ | ----------- |
+| Mean | The adjusted, average execution time for a _single_ run, scaled to the most appropriate time unit to keep the output tidy. |
+| Change | The relative difference between this run and the last run, if more than two standard deviations. |
+| Samples | The number of valid/total samples, the difference being outliers (5th and 95th quantiles) excluded from consideration. |
 */
 
 #![deny(unsafe_code)]
@@ -79,73 +194,29 @@ There are currently three styles of callback:
 
 #![allow(
 	clippy::module_name_repetitions,
+	clippy::needless_doctest_main,
 	clippy::redundant_pub_crate,
 )]
 
-
-
 mod bench;
-#[macro_use]
-mod macros;
+mod error;
+#[macro_use] mod macros;
+mod stats;
+pub(crate) mod util;
+
+
 
 pub use bench::{
 	Bench,
-	BenchResult,
-	error::BenchError,
-	history::History,
-	stats::Stats,
+	Benches,
+};
+pub use error::BrunchError;
+pub(crate) use stats::{
+	History,
+	Stats,
 };
 
 
 
-#[doc(hidden)]
-/// # Analyze Results.
-///
-/// This method is called by the [`benches`] macro. It is not intended to be
-/// called directly.
-pub fn analyze(benches: &mut [Bench]) {
-	// Update histories.
-	let mut history = History::default();
-	benches.iter_mut().for_each(|x| x.history(&mut history));
-	history.save();
-
-	// Pull results.
-	let results: Vec<BenchResult> = benches.iter()
-		.map(BenchResult::from)
-		.collect();
-
-	// Count up the lengths so we can display pretty-like.
-	let (c1, c2, c3) = results.iter()
-		.fold((0, 0, 0), |(c1, c2, c3), res| {
-			let (r1, r2, r3) = res.lens();
-			(
-				c1.max(r1),
-				c2.max(r2),
-				c3.max(r3),
-			)
-		});
-
-	// Print the successes!
-	results.iter().for_each(|x| x.print(c1, c2, c3));
-	println!();
-}
-
-
-
-#[allow(unsafe_code)]
-#[doc(hidden)]
-/// # Black Box.
-///
-/// This pseudo-black box is stolen from [`easybench`](https://crates.io/crates/easybench), which
-/// stole it from `Bencher`.
-///
-/// The gist is it mostly works, but may fail to prevent the compiler from
-/// optimizing it away in some cases. Avoiding nightly, it is the best we've
-/// got.
-pub(crate) fn black_box<T>(dummy: T) -> T {
-	unsafe {
-		let ret = std::ptr::read_volatile(&dummy);
-		std::mem::forget(dummy);
-		ret
-	}
-}
+/// # Minimum Number of Samples.
+pub(crate) const MIN_SAMPLES: usize = 100;

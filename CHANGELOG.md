@@ -1,6 +1,64 @@
 # Changelog
 
 
+## [0.3.0](https://github.com/Blobfolio/brunch/releases/tag/v0.3.0) - 2022-08-22
+
+This release includes a number of improvements to the `Brunch` API, but as a result, existing benchmarks will need a few (minor) changes when migrating from `0.2.x` to `0.3.x`.
+
+First and foremost, `Bench::new` has been streamlined, and now takes the name as a single argument (rather than two). When migrating, just glue the two values back together, e.g. `"foo::bar", "baz(20)"` to `"foo::bar::baz(20)"`.
+
+Each bench now runs until it has reached _either_ its sample or timeout limit, rather than running as many times as it can within a fixed time period. Existing benchmarks with `Bench::timed` will need to switch to `Bench::with_timeout` if that was used to extend the run, or removed if used to shorten it.
+
+The execution methods have been cleaned up as well, and now come in three flavors:
+
+| Method | Argument(s) | Description |
+| ------ | ----------- | ----------- |
+| `Bench::run` | `FnMut()->O` | For use with self-contained (argument-free) benchmarks. |
+| `Bench::run_seeded` | `I: Clone`, `FnMut(I)->O` | For use with benchmarks that accept a single, cloneable argument. |
+| `Bench::run_seeded_with` | `FnMut() -> I`, `FmMut(I)->O` | Also for benchmarks that accept one argument, but one that's easier to produce from a callback. |
+
+`Bench::run` corresponds to `0.2.x`'s `Bench::with`, while `Bench::run_seeded*` is akin to `0.2.x`'s `Bench::with_setup*`.
+
+There is no longer any explicit argument-as-reference version, but you can accomplish the same thing using `Bench::run_seeded`, like:
+
+```rust
+Bench::new("hello::world(&15)")
+	.run_seeded(15, |s| hello::world(&s))
+```
+
+Time-tracking is now done per-method-call (rather than in batches), meaning the precision is now capped at the level of nanoseconds. This improves the results in a number of ways, but means _really fast_ methods won't chart in a meaningful way anymore.
+
+If you need to compare _really fast_ things, it is recommended you perform some sort of iteration within the callback being benchmarked (to increase its runtime). Take a look at the main documentation for an example.
+
+That's it! Apologies for the switch-up, but hopefully you'll agree the new layout is friendlier and more flexible than the old one. :)
+
+### New
+
+* Benches can now be constructed without the `benches!` macro if desired, using the new `Benches` struct. Refer to the main documentation for an example;
+* `Bench::with_samples` (to set target sample limit);
+* `Bench::with_timeout` (to set duration timeout);
+* [`quantogram`](https://crates.io/crates/quantogram) and [`unicode-width`](https://crates.io/crates/unicode-width) have been added as dependencies;
+* The environmental variable `BRUNCH_DIR` can be used to specify a location other than `std::env::temp_dir` for the history file.
+* The environmental variable `NO_BRUNCH_HISTORY` can be used to disable run-to-run history altogether.
+
+### Changed
+
+* `Bench::new` now accepts name as a single argument instead of two;
+* Improved statistical analysis, particularly in regards to outlier detection/removal;
+* Improved visual display, particularly in regards to multibyte column layouts;
+* Improved memory usage for seeded benchmarks;
+* Time tracking is now capped at `nanoseconds`;
+
+### Removed
+
+* `Bench::timed` (see `Bench::with_timeout`);
+* `Bench::with` (see `Bench::run`);
+* `Bench::with_setup` (see `Bench::run_seeded` / `Bench::run_seeded_with`);
+* `Bench::with_setup_ref` (see `Bench::run_seeded` / `Bench::run_seeded_with`);
+* [`serde_derive`](https://crates.io/crates/serde_derive) dependency;
+
+
+
 ## [0.2.6](https://github.com/Blobfolio/brunch/releases/tag/v0.2.6) - 2022-06-18
 
 ### Misc
