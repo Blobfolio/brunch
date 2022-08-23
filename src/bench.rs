@@ -111,8 +111,14 @@ impl Benches {
 		// Build the summaries.
 		let mut history = History::default();
 		let mut summary = Table::default();
+		let names: Vec<Vec<char>> = self.0.iter()
+			.filter_map(|b|
+				if b.is_spacer() { None }
+				else { Some(b.name.chars().collect()) }
+			)
+			.collect();
 		for b in &self.0 {
-			summary.push(b, &history);
+			summary.push(b, &names, &history);
 		}
 
 		// Update the history.
@@ -509,10 +515,10 @@ impl fmt::Display for Table {
 
 impl Table {
 	/// # Add Row.
-	fn push(&mut self, src: &Bench, history: &History) {
+	fn push(&mut self, src: &Bench, names: &[Vec<char>], history: &History) {
 		if src.is_spacer() { self.0.push(TableRow::Spacer); }
 		else {
-			let name = format_name(&src.name);
+			let name = format_name(src.name.chars().collect(), names);
 			match src.stats.unwrap_or(Err(BrunchError::NoRun)) {
 				Ok(s) => {
 					let time = s.nice_mean();
@@ -586,39 +592,30 @@ impl TableRow {
 #[allow(clippy::option_if_let_else)]
 /// # Format Name.
 ///
-/// Style up a benchmark name.
-fn format_name(name: &str) -> String {
-	let mut out = String::with_capacity(name.len() + 8);
-	out.push_str("\x1b[2m");
+/// Style up a benchmark name by dimming common portions, and highlighting
+/// unique ones.
+///
+/// This approach won't scale well, but the bench count for any given set
+/// should be relatively low.
+fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
+	// Find the point at which the content is totally unique.
+	let pos: usize = names.iter()
+		.filter_map(|other|
+			name.iter()
+				.zip(other.iter())
+				.position(|(l, r)| l != r)
+		)
+		.max()
+		.unwrap_or_default();
 
-	let mut last: char = '?';
-	let mut chars = name.trim().chars().peekable();
-	while let Some(c) = chars.next() {
-		if c.is_whitespace() {
-			out.push(' ');
-		}
-		else if matches!(c, ':' | '(' | ')') {
-			// Color it, unless the last character was colored thusly.
-			if ! matches!(last, ':' | '(' | ')') {
-				out.push_str("\x1b[0;38;5;5m");
-			}
-
-			out.push(c);
-
-			// End the color, unless the next char also needs coloring. If
-			// there is no next character, we can skip this too because we end
-			// the string with a full reset.
-			if chars.peek().map_or(false, |next| ! matches!(next, ':' | '(' | ')')) {
-				out.push_str("\x1b[0;2m");
-			}
-		}
-		else {
-			out.push(c);
-		}
-
-		last = c;
+	if pos == 0 { name.into_iter().collect() }
+	else {
+		let b = name.split_off(pos);
+		"\x1b[34m".chars()
+			.chain(name.into_iter())
+			.chain("\x1b[94m".chars())
+			.chain(b.into_iter())
+			.chain("\x1b[0m".chars())
+			.collect()
 	}
-
-	out.push_str("\x1b[0m");
-	out
 }
