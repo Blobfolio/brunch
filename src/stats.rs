@@ -337,7 +337,7 @@ impl Stats {
 		let trunc = u32::from_f64(mean.trunc()).unwrap_or_default();
 		let fract = u8::from_f64((mean.fract() * 100.0).trunc()).unwrap_or_default();
 
-		format!("{}.{:02} {}", NiceU32::from(trunc), fract, unit)
+		format!("\x1b[0;1m{}.{:02} {}\x1b[0m", NiceU32::from(trunc), fract, unit)
 	}
 
 	/// # Samples.

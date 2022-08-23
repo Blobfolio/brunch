@@ -457,7 +457,7 @@ impl fmt::Display for Table {
 			let (c1, c2, c3, c4) = v.lens();
 			match v {
 				TableRow::Normal(a, b, c, d) => writeln!(
-					f, "{}{}    {}\x1b[1m{}\x1b[0m    {}{}    {}{}",
+					f, "{}{}    {}{}    {}{}    {}{}",
 					a, &pad[..w1 - c1],
 					&pad[..w2 - c2], b,
 					&pad[..w3 - c3], c,
