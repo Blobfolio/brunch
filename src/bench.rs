@@ -77,7 +77,13 @@ impl Benches {
 	/// // Repeat push as needed.
 	/// benches.finish();
 	/// ```
-	pub fn push(&mut self, b: Bench) { self.0.push(b); }
+	pub fn push(&mut self, mut b: Bench) {
+		if ! b.is_spacer() && self.has_name(&b.name) {
+			b.stats.replace(Err(BrunchError::DupeName));
+		}
+
+		self.0.push(b);
+	}
 
 	/// # Finish.
 	///
@@ -126,6 +132,13 @@ impl Benches {
 
 		// Save it.
 		history.save();
+	}
+}
+
+impl Benches {
+	/// # Has Name.
+	fn has_name(&self, name: &str) -> bool {
+		self.0.iter().any(|b| b.name == name)
 	}
 }
 
