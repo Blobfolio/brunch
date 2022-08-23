@@ -5,18 +5,18 @@
 [![crates.io](https://img.shields.io/crates/v/brunch.svg)](https://crates.io/crates/brunch)
 [![Build Status](https://github.com/Blobfolio/brunch/workflows/Build/badge.svg)](https://github.com/Blobfolio/brunch/actions)
 [![Dependency Status](https://deps.rs/repo/github/blobfolio/brunch/status.svg)](https://deps.rs/repo/github/blobfolio/brunch)
-
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/Blobfolio/brunch)
 
 
 
 `Brunch` is a very simple Rust micro-benchmark runner inspired by [`easybench`](https://crates.io/crates/easybench). It has roughly a million times fewer dependencies than [`criterion`](https://crates.io/crates/criterion), does not require nightly, and maintains a "last run" state so can show relative changes benchmark-to-benchmark.
 
-The formatting is also quite pretty.
+(The formatting is also quite pretty.)
 
 As with all Rust benchmarking, there are a lot of caveats, and results might be artificially fast or slow. For best results:
-* build optimized;
-* collect lots of samples;
-* repeat identical runs to get a feel for the natural variation;
+* Build optimized;
+* Collect lots of samples;
+* Repeat identical runs to get a feel for the natural variation;
 
 `Brunch` cannot measure time below the level of a nanosecond, so if you're trying to benchmark methods that are _really_ fast, you may need to wrap them in a method that runs through several iterations at once. For example:
 

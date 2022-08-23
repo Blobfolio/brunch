@@ -1,6 +1,22 @@
 # Changelog
 
 
+## [0.3.1](https://github.com/Blobfolio/brunch/releases/tag/v0.3.1) - TBD
+
+### Changes
+
+* Coloration tweaks;
+* Improved float handling;
+* Suppress _Change_ summary column when there aren't any;
+* Warn if the same `Bench` name is submitted twice;
+
+### Fixed
+
+* env `NO_BRUNCH_HISTORY` should only apply when `=1`;
+* Normalize whitespace in `Bench` names to prevent display weirdness;
+
+
+
 ## [0.3.0](https://github.com/Blobfolio/brunch/releases/tag/v0.3.0) - 2022-08-22
 
 This release includes a number of improvements to the `Brunch` API, but as a result, existing benchmarks will need a few (minor) changes when migrating from `0.2.x` to `0.3.x`.
