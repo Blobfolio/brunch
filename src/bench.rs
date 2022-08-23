@@ -466,8 +466,8 @@ impl Default for Table {
 			TableRow::Normal(
 				"\x1b[1;95mMethod".to_owned(),
 				"Mean".to_owned(),
-				"Change".to_owned(),
-				"Samples\x1b[0m".to_owned()
+				"Samples".to_owned(),
+				"Change\x1b[0m".to_owned(),
 			),
 			TableRow::Spacer,
 		])
@@ -478,13 +478,17 @@ impl fmt::Display for Table {
 	#[allow(clippy::many_single_char_names)]
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		// Maximum column widths.
-		let (w1, w2, w3, w4) = self.lens();
+		let (w1, w2, w3, mut w4) = self.lens();
+		let changes = self.show_changes();
+		let width =
+			if changes { w1 + w2 + w3 + w4 + 12 }
+			else {
+				w4 = 0;
+				w1 + w2 + w3 + 8
+			};
 
 		// Pre-generate the full-width spacer content.
-		let spacer = format!(
-			"\x1b[35m{}\x1b[0m\n",
-			"-".repeat(w1 + w2 + w3 + w4 + 12)
-		);
+		let spacer = format!("\x1b[35m{}\x1b[0m\n", "-".repeat(width));
 
 		// Pre-generate padding too. We'll slice this to size each time padding
 		// is needed.
@@ -494,12 +498,18 @@ impl fmt::Display for Table {
 		for v in &self.0 {
 			let (c1, c2, c3, c4) = v.lens();
 			match v {
-				TableRow::Normal(a, b, c, d) => writeln!(
+				TableRow::Normal(a, b, c, d) if changes => writeln!(
 					f, "{}{}    {}{}    {}{}    {}{}",
 					a, &pad[..w1 - c1],
 					&pad[..w2 - c2], b,
 					&pad[..w3 - c3], c,
 					&pad[..w4 - c4], d,
+				)?,
+				TableRow::Normal(a, b, c, _) => writeln!(
+					f, "{}{}    {}{}    {}{}",
+					a, &pad[..w1 - c1],
+					&pad[..w2 - c2], b,
+					&pad[..w3 - c3], c,
 				)?,
 				TableRow::Error(a, b) => writeln!(
 					f, "{}{}    \x1b[1;38;5;208m{}\x1b[0m",
@@ -532,13 +542,23 @@ impl Table {
 						NiceU64::from(total),
 					);
 
-					self.0.push(TableRow::Normal(name, time, diff, samples));
+					self.0.push(TableRow::Normal(name, time, samples, diff));
 				},
 				Err(e) => {
 					self.0.push(TableRow::Error(name, e));
 				}
 			}
 		}
+	}
+
+	/// # Has Changes?
+	///
+	/// Returns true if any of the Change columns have a value.
+	fn show_changes(&self) -> bool {
+		self.0.iter().skip(2).any(|v|
+			if let TableRow::Normal(_, _, _, c) = v { c != NO_CHANGE }
+			else { false }
+		)
 	}
 
 	/// # Widths.
