@@ -5,8 +5,13 @@
 use crate::{
 	BrunchError,
 	MIN_SAMPLES,
+	util,
 };
-use dactyl::NicePercent;
+use dactyl::{
+	NicePercent,
+	NiceU32,
+};
+use num_traits::FromPrimitive;
 use quantogram::Quantogram;
 use serde::{
 	de,
@@ -88,16 +93,16 @@ impl History {
 /// # Runtime Stats!
 pub(crate) struct Stats {
 	/// # Total Samples.
-	pub(crate) total: usize,
+	total: usize,
 
 	/// # Valid Samples.
-	pub(crate) valid: usize,
+	valid: usize,
 
 	/// # Standard Deviation.
 	deviation: f64,
 
 	/// # Mean Duration of Valid Samples.
-	pub(crate) mean: f64,
+	mean: f64,
 }
 
 impl<'de> Deserialize<'de> for Stats {
@@ -238,31 +243,43 @@ impl TryFrom<Vec<Duration>> for Stats {
 		let mut q = Quantogram::new();
 		q.add_unweighted_samples(samples.iter());
 
-		// Grab the deviation of the full set. (This is a better representation
-		// of variation than if we pulled it only from the valid set.)
-		let deviation = q.stddev().ok_or(BrunchError::Overflow)?;
+		// Grab the deviation of the full set.
+		let mut deviation = q.stddev().ok_or(BrunchError::Overflow)?;
+		let mut valid = total;
+		let mean =
+			// No deviation means no outliers.
+			if util::float_eq(deviation, 0.0) {
+				q.mean().ok_or(BrunchError::Overflow)?
+			}
+			// Weed out the weirdos.
+			else {
+				// Determine outlier range (+- 5%).
+				let q1 = q.fussy_quantile(0.05, 2.0).ok_or(BrunchError::Overflow)?;
+				let q3 = q.fussy_quantile(0.95, 2.0).ok_or(BrunchError::Overflow)?;
+				let iqr = q3 - q1;
 
-		// Determine outlier range (+- 5%).
-		let q1 = q.fussy_quantile(0.05, 2.0).ok_or(BrunchError::Overflow)?;
-		let q3 = q.fussy_quantile(0.95, 2.0).ok_or(BrunchError::Overflow)?;
-		let iqr = q3 - q1;
+				// Low and high boundaries.
+				let lo = iqr.mul_add(-1.5, q1);
+				let hi = iqr.mul_add(1.5, q3);
 
-		// Low and high boundaries.
-		let lo = iqr.mul_add(-1.5, q1);
-		let hi = iqr.mul_add(1.5, q3);
+				// Remove outliers.
+				samples.retain(|&s| util::float_le(lo, s) && util::float_le(s, hi));
 
-		samples.retain(|&s| lo <= s && s <= hi);
+				valid = samples.len();
+				if valid < MIN_SAMPLES { return Err(BrunchError::TooWild); }
 
-		let valid = samples.len();
-		if valid < MIN_SAMPLES { return Err(BrunchError::TooWild); }
-
-		// Find the new mean.
-		q = Quantogram::new();
-		q.add_unweighted_samples(samples.iter());
-		let mean = q.mean().ok_or(BrunchError::Overflow)?;
+				// Find the new mean.
+				q = Quantogram::new();
+				q.add_unweighted_samples(samples.iter());
+				let mean = q.mean().ok_or(BrunchError::Overflow)?;
+				deviation = q.stddev().ok_or(BrunchError::Overflow)?;
+				mean
+			};
 
 		// Done!
-		Ok(Self{ total, valid, deviation, mean })
+		let out = Self { total, valid, deviation, mean };
+		if out.is_valid() { Ok(out) }
+		else { Err(BrunchError::Overflow) }
 	}
 }
 
@@ -277,8 +294,8 @@ impl Stats {
 	pub(crate) fn is_deviant(self, other: Self) -> Option<String> {
 		let dev = 2.0 * self.deviation;
 		if
-			matches!(other.mean.total_cmp(&(self.mean - dev)), Ordering::Less) ||
-			matches!(other.mean.total_cmp(&(self.mean + dev)), Ordering::Greater)
+			util::float_lt(other.mean, self.mean - dev) ||
+			util::float_gt(other.mean, self.mean + dev)
 		{
 			let (color, sign, diff) = match self.mean.total_cmp(&other.mean) {
 				Ordering::Less => (92, "-", other.mean - self.mean),
@@ -297,14 +314,46 @@ impl Stats {
 		None
 	}
 
+	/// # Nice Mean.
+	///
+	/// Return the mean rescaled to the most appropriate unit.
+	pub(crate) fn nice_mean(self) -> String {
+		let mut mean = self.mean;
+		let unit: &str =
+			if util::float_lt(mean, 0.000_001) {
+				mean *= 1_000_000_000.000;
+				"ns"
+			}
+			else if util::float_lt(mean, 0.001) {
+				mean *= 1_000_000.000;
+				"\u{3bc}s"
+			}
+			else if util::float_lt(mean, 1.0) {
+				mean *= 1_000.000;
+				"ms"
+			}
+			else { "s " };
+
+		// Convert the whole and fractional parts to integers.
+		let trunc = u32::from_f64(mean.trunc()).unwrap_or_default();
+		let fract = u8::from_f64((mean.fract() * 100.0).trunc()).unwrap_or_default();
+
+		format!("\x1b[0;1m{}.{:02} {}\x1b[0m", NiceU32::from(trunc), fract, unit)
+	}
+
+	/// # Samples.
+	///
+	/// Return the valid/total samples.
+	pub(crate) const fn samples(self) -> (usize, usize) { (self.valid, self.total) }
+
 	/// # Is Valid?
 	fn is_valid(self) -> bool {
 		MIN_SAMPLES <= self.valid &&
 		self.valid <= self.total &&
 		self.deviation.is_finite() &&
-		matches!(self.deviation.total_cmp(&0.0), Ordering::Equal | Ordering::Greater) &&
+		util::float_ge(self.deviation, 0.0) &&
 		self.mean.is_finite() &&
-		matches!(self.mean.total_cmp(&0.0), Ordering::Equal | Ordering::Greater)
+		util::float_ge(self.mean, 0.0)
 	}
 }
 
@@ -314,7 +363,7 @@ impl Stats {
 ///
 /// Return the file path history should be written to or read from.
 fn history_path() -> Option<PathBuf> {
-	if std::env::var_os("NO_BRUNCH_HISTORY").is_some() { None }
+	if std::env::var("NO_BRUNCH_HISTORY").map_or(false, |s| s.trim() == "1") { None }
 	else {
 		let mut p = try_dir(std::env::var_os("BRUNCH_DIR"))
 			.or_else(|| try_dir(Some(std::env::temp_dir())))?;
@@ -363,14 +412,12 @@ mod tests {
 		// Make sure we end up where we began.
 		assert_eq!(stat.total, d.total, "Deserialization changed total.");
 		assert_eq!(stat.valid, d.valid, "Deserialization changed valid.");
-		assert_eq!(
-			stat.deviation.total_cmp(&d.deviation),
-			Ordering::Equal,
+		assert!(
+			util::float_eq(stat.deviation, d.deviation),
 			"Deserialization changed deviation."
 		);
-		assert_eq!(
-			stat.mean.total_cmp(&d.mean),
-			Ordering::Equal,
+		assert!(
+			util::float_eq(stat.mean, d.mean),
 			"Deserialization changed mean."
 		);
 	}

@@ -38,7 +38,7 @@ macro_rules! benches {
 			// Run the benches.
 			let mut benches = $crate::Benches::default();
 			$(
-				::std::eprint!("\x1b[1;38;5;4m•\x1b[0m");
+				::std::eprint!("\x1b[1;34m•\x1b[0m");
 				benches.push($benches);
 			)+
 			::std::eprintln!("\n");

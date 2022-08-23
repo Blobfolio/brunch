@@ -1,9 +1,25 @@
 # Changelog
 
 
+## [0.3.1](https://github.com/Blobfolio/brunch/releases/tag/v0.3.1) - 2022-08-23
+
+### Changes
+
+* Coloration tweaks;
+* Improved float handling;
+* Suppress _Change_ summary column when there aren't any;
+* Warn if the same `Bench` name is submitted twice;
+
+### Fixed
+
+* env `NO_BRUNCH_HISTORY` should only apply when `=1`;
+* Normalize whitespace in `Bench` names to prevent display weirdness;
+
+
+
 ## [0.3.0](https://github.com/Blobfolio/brunch/releases/tag/v0.3.0) - 2022-08-22
 
-This release includes a number of improvements to the `Brunch` API, but as a result, existing benchmarks will need a few (minor) changes when migrating from `0.2.x` to `0.3.x`.
+This release includes a number of improvements to the `Brunch` API, but also some **breaking changes**. Existing benchmarks will require a few (minor) adjustments when migrating from `0.2.x` to `0.3.x`.
 
 First and foremost, `Bench::new` has been streamlined, and now takes the name as a single argument (rather than two). When migrating, just glue the two values back together, e.g. `"foo::bar", "baz(20)"` to `"foo::bar::baz(20)"`.
 

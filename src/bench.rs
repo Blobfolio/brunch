@@ -77,7 +77,13 @@ impl Benches {
 	/// // Repeat push as needed.
 	/// benches.finish();
 	/// ```
-	pub fn push(&mut self, b: Bench) { self.0.push(b); }
+	pub fn push(&mut self, mut b: Bench) {
+		if ! b.is_spacer() && self.has_name(&b.name) {
+			b.stats.replace(Err(BrunchError::DupeName));
+		}
+
+		self.0.push(b);
+	}
 
 	/// # Finish.
 	///
@@ -105,8 +111,14 @@ impl Benches {
 		// Build the summaries.
 		let mut history = History::default();
 		let mut summary = Table::default();
+		let names: Vec<Vec<char>> = self.0.iter()
+			.filter_map(|b|
+				if b.is_spacer() { None }
+				else { Some(b.name.chars().collect()) }
+			)
+			.collect();
 		for b in &self.0 {
-			summary.push(b, &history);
+			summary.push(b, &names, &history);
 		}
 
 		// Update the history.
@@ -126,6 +138,13 @@ impl Benches {
 
 		// Save it.
 		history.save();
+	}
+}
+
+impl Benches {
+	/// # Has Name.
+	fn has_name(&self, name: &str) -> bool {
+		self.0.iter().any(|b| b.name == name)
 	}
 }
 
@@ -175,8 +194,27 @@ impl Bench {
 		let name = name.as_ref().trim();
 		assert!(! name.is_empty(), "Name is required.");
 
+		// Compact and normalize whitespace, but otherwise pass whatever the
+		// name is on through.
+		let mut ws = false;
+		let name = name.chars()
+			.filter_map(|c|
+				if c.is_whitespace() {
+					if ws { None }
+					else {
+						ws = true;
+						Some(' ')
+					}
+				}
+				else {
+					ws = false;
+					Some(c)
+				}
+			)
+			.collect();
+
 		Self {
-			name: name.to_owned(),
+			name,
 			samples: DEFAULT_SAMPLES,
 			timeout: DEFAULT_TIMEOUT,
 			stats: None,
@@ -426,10 +464,10 @@ impl Default for Table {
 	fn default() -> Self {
 		Self(vec![
 			TableRow::Normal(
-				"\x1b[1;38;5;13mMethod".to_owned(),
+				"\x1b[1;95mMethod".to_owned(),
 				"Mean".to_owned(),
-				"Change".to_owned(),
-				"Samples\x1b[0m".to_owned()
+				"Samples".to_owned(),
+				"Change\x1b[0m".to_owned(),
 			),
 			TableRow::Spacer,
 		])
@@ -440,13 +478,17 @@ impl fmt::Display for Table {
 	#[allow(clippy::many_single_char_names)]
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		// Maximum column widths.
-		let (w1, w2, w3, w4) = self.lens();
+		let (w1, w2, w3, mut w4) = self.lens();
+		let changes = self.show_changes();
+		let width =
+			if changes { w1 + w2 + w3 + w4 + 12 }
+			else {
+				w4 = 0;
+				w1 + w2 + w3 + 8
+			};
 
 		// Pre-generate the full-width spacer content.
-		let spacer = format!(
-			"\x1b[38;5;5m{}\x1b[0m\n",
-			"-".repeat(w1 + w2 + w3 + w4 + 12)
-		);
+		let spacer = format!("\x1b[35m{}\x1b[0m\n", "-".repeat(width));
 
 		// Pre-generate padding too. We'll slice this to size each time padding
 		// is needed.
@@ -456,12 +498,18 @@ impl fmt::Display for Table {
 		for v in &self.0 {
 			let (c1, c2, c3, c4) = v.lens();
 			match v {
-				TableRow::Normal(a, b, c, d) => writeln!(
+				TableRow::Normal(a, b, c, d) if changes => writeln!(
 					f, "{}{}    {}{}    {}{}    {}{}",
 					a, &pad[..w1 - c1],
 					&pad[..w2 - c2], b,
 					&pad[..w3 - c3], c,
 					&pad[..w4 - c4], d,
+				)?,
+				TableRow::Normal(a, b, c, _) => writeln!(
+					f, "{}{}    {}{}    {}{}",
+					a, &pad[..w1 - c1],
+					&pad[..w2 - c2], b,
+					&pad[..w3 - c3], c,
 				)?,
 				TableRow::Error(a, b) => writeln!(
 					f, "{}{}    \x1b[1;38;5;208m{}\x1b[0m",
@@ -477,29 +525,40 @@ impl fmt::Display for Table {
 
 impl Table {
 	/// # Add Row.
-	fn push(&mut self, src: &Bench, history: &History) {
+	fn push(&mut self, src: &Bench, names: &[Vec<char>], history: &History) {
 		if src.is_spacer() { self.0.push(TableRow::Spacer); }
 		else {
-			let name = format_name(&src.name);
+			let name = format_name(src.name.chars().collect(), names);
 			match src.stats.unwrap_or(Err(BrunchError::NoRun)) {
 				Ok(s) => {
-					let time = util::format_time(s.mean);
+					let time = s.nice_mean();
 					let diff = history.get(&src.name)
 						.and_then(|h| s.is_deviant(h))
 						.unwrap_or_else(|| NO_CHANGE.to_owned());
+					let (valid, total) = s.samples();
 					let samples = format!(
-						"\x1b[2m{}\x1b[0;38;5;5m/\x1b[0;2m{}\x1b[0m",
-						NiceU64::from(s.valid),
-						NiceU64::from(s.total),
+						"\x1b[2m{}\x1b[0;35m/\x1b[0;2m{}\x1b[0m",
+						NiceU64::from(valid),
+						NiceU64::from(total),
 					);
 
-					self.0.push(TableRow::Normal(name, time, diff, samples));
+					self.0.push(TableRow::Normal(name, time, samples, diff));
 				},
 				Err(e) => {
 					self.0.push(TableRow::Error(name, e));
 				}
 			}
 		}
+	}
+
+	/// # Has Changes?
+	///
+	/// Returns true if any of the Change columns have a value.
+	fn show_changes(&self) -> bool {
+		self.0.iter().skip(2).any(|v|
+			if let TableRow::Normal(_, _, _, c) = v { c != NO_CHANGE }
+			else { false }
+		)
 	}
 
 	/// # Widths.
@@ -553,22 +612,39 @@ impl TableRow {
 #[allow(clippy::option_if_let_else)]
 /// # Format Name.
 ///
-/// Style up a benchmark name.
-fn format_name(name: &str) -> String {
-	// Last opening parenthesis?
-	if let Some(pos) = name.rfind('(') {
-		// Is there a namespace thing behind it?
-		if let Some(pos2) = name[..pos].rfind("::") {
-			format!("\x1b[2m{}::\x1b[0m{}", &name[..pos2], &name[pos2 + 2..])
-		}
-		else {
-			format!("\x1b[2m{}\x1b[0m{}", &name[..pos], &name[pos..])
-		}
+/// Style up a benchmark name by dimming common portions, and highlighting
+/// unique ones.
+///
+/// This approach won't scale well, but the bench count for any given set
+/// should be relatively low.
+fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
+	// Find the first unique char occurrence.
+	let pos: usize = names.iter()
+		.filter_map(|other|
+			if name.eq(other) { None }
+			else {
+				name.iter()
+					.zip(other.iter())
+					.position(|(l, r)| l != r)
+					.or_else(|| Some(name.len().min(other.len())))
+			}
+		)
+		.max()
+		.unwrap_or_default();
+
+	if pos == 0 {
+		"\x1b[94m".chars()
+			.chain(name.into_iter())
+			.chain("\x1b[0m".chars())
+			.collect()
 	}
-	// Last namespace thing?
-	else if let Some(pos) = name.rfind("::") {
-		format!("\x1b[2m{}::\x1b[0m{}", &name[..pos], &name[pos + 2..])
+	else {
+		let b = name.split_off(pos);
+		"\x1b[34m".chars()
+			.chain(name.into_iter())
+			.chain("\x1b[94m".chars())
+			.chain(b.into_iter())
+			.chain("\x1b[0m".chars())
+			.collect()
 	}
-	// Leave it boring.
-	else { ["\x1b[2m", name, "\x1b[0m"].concat() }
 }
