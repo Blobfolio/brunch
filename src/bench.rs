@@ -556,20 +556,37 @@ impl TableRow {
 ///
 /// Style up a benchmark name.
 fn format_name(name: &str) -> String {
-	// Last opening parenthesis?
-	if let Some(pos) = name.rfind('(') {
-		// Is there a namespace thing behind it?
-		if let Some(pos2) = name[..pos].rfind("::") {
-			format!("\x1b[2m{}::\x1b[0m{}", &name[..pos2], &name[pos2 + 2..])
+	let mut out = String::with_capacity(name.len() + 8);
+	out.push_str("\x1b[2m");
+
+	let mut last: char = '?';
+	let mut chars = name.trim().chars().peekable();
+	while let Some(c) = chars.next() {
+		if c.is_whitespace() {
+			out.push(' ');
+		}
+		else if matches!(c, ':' | '(' | ')') {
+			// Color it, unless the last character was colored thusly.
+			if ! matches!(last, ':' | '(' | ')') {
+				out.push_str("\x1b[0;38;5;5m");
+			}
+
+			out.push(c);
+
+			// End the color, unless the next char also needs coloring. If
+			// there is no next character, we can skip this too because we end
+			// the string with a full reset.
+			if chars.peek().map_or(false, |next| ! matches!(next, ':' | '(' | ')')) {
+				out.push_str("\x1b[0;2m");
+			}
 		}
 		else {
-			format!("\x1b[2m{}\x1b[0m{}", &name[..pos], &name[pos..])
+			out.push(c);
 		}
+
+		last = c;
 	}
-	// Last namespace thing?
-	else if let Some(pos) = name.rfind("::") {
-		format!("\x1b[2m{}::\x1b[0m{}", &name[..pos], &name[pos + 2..])
-	}
-	// Leave it boring.
-	else { ["\x1b[2m", name, "\x1b[0m"].concat() }
+
+	out.push_str("\x1b[0m");
+	out
 }
