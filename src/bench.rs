@@ -601,9 +601,13 @@ fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
 	// Find the first unique char occurrence.
 	let pos: usize = names.iter()
 		.filter_map(|other|
-			name.iter()
-				.zip(other.iter())
-				.position(|(l, r)| l != r)
+			if name.eq(other) { None }
+			else {
+				name.iter()
+					.zip(other.iter())
+					.position(|(l, r)| l != r)
+					.or_else(|| Some(name.len().min(other.len())))
+			}
 		)
 		.max()
 		.unwrap_or_default();
