@@ -4,6 +4,7 @@
 
 use dactyl::NiceU32;
 use num_traits::FromPrimitive;
+use std::cmp::Ordering;
 use unicode_width::UnicodeWidthChar;
 
 
@@ -26,27 +27,50 @@ pub(crate) fn black_box<T>(dummy: T) -> T {
 	}
 }
 
+/// # Float < Float.
+pub(crate) fn float_lt(a: f64, b: f64) -> bool {
+	matches!(a.total_cmp(&b), Ordering::Less)
+}
+
+/// # Float <= Float.
+pub(crate) fn float_le(a: f64, b: f64) -> bool {
+	matches!(a.total_cmp(&b), Ordering::Less | Ordering::Equal)
+}
+
+/// # Float == Float.
+pub(crate) fn float_eq(a: f64, b: f64) -> bool {
+	matches!(a.total_cmp(&b), Ordering::Equal)
+}
+
+/// # Float >= Float.
+pub(crate) fn float_ge(a: f64, b: f64) -> bool {
+	matches!(a.total_cmp(&b), Ordering::Equal | Ordering::Greater)
+}
+
+/// # Float > Float.
+pub(crate) fn float_gt(a: f64, b: f64) -> bool {
+	matches!(a.total_cmp(&b), Ordering::Greater)
+}
+
 /// # Format w/ Unit.
 ///
 /// Give us a nice comma-separated integer with two decimal places and an
 /// appropriate unit (running from pico seconds to milliseconds).
 pub(crate) fn format_time(mut time: f64) -> String {
 	let unit: &str =
-		if time < 0.000_001 {
+		if float_lt(time, 0.000_001) {
 			time *= 1_000_000_000.000;
 			"ns"
 		}
-		else if time < 0.001 {
+		else if float_lt(time, 0.001) {
 			time *= 1_000_000.000;
 			"\u{3bc}s"
 		}
-		else if time < 1.0 {
+		else if float_lt(time, 1.0) {
 			time *= 1_000.000;
 			"ms"
 		}
-		else if time < 60.0 {
-			"s "
-		}
+		else if float_lt(time, 60.0) { "s " }
 		else {
 			time /= 60.0;
 			"m "
@@ -55,7 +79,7 @@ pub(crate) fn format_time(mut time: f64) -> String {
 	format!(
 		"\x1b[1m{}.{:02} {}\x1b[0m",
 		NiceU32::from(u32::from_f64(time.trunc()).unwrap_or_default()).as_str(),
-		u32::from_f64(f64::floor(time.fract() * 100.0)).unwrap_or_default(),
+		u8::from_f64((time.fract() * 100.0).trunc()).unwrap_or_default(),
 		unit
 	)
 }
@@ -83,4 +107,31 @@ pub(crate) fn width(src: &str) -> usize {
 				UnicodeWidthChar::width(c).map_or(w, |w2| w2 + w)
 			}
 		})
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn cmp_float() {
+		assert!(float_lt(5.0, 10.0));
+		assert!(! float_lt(10.0, 10.0));
+		assert!(! float_lt(11.0, 10.0));
+
+		assert!(float_le(5.0, 10.0));
+		assert!(float_le(10.0, 10.0));
+		assert!(! float_le(11.0, 10.0));
+
+		assert!(float_eq(5.0, 5.0));
+		assert!(! float_eq(5.0, 5.00000001));
+
+		assert!(float_ge(15.0, 10.0));
+		assert!(float_ge(10.0, 10.0));
+		assert!(! float_ge(9.999, 10.0));
+
+		assert!(float_gt(15.0, 10.0));
+		assert!(! float_gt(10.0, 10.0));
+		assert!(! float_gt(9.999, 10.0));
+	}
 }

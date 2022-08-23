@@ -5,6 +5,7 @@
 use crate::{
 	BrunchError,
 	MIN_SAMPLES,
+	util,
 };
 use dactyl::NicePercent;
 use quantogram::Quantogram;
@@ -238,31 +239,42 @@ impl TryFrom<Vec<Duration>> for Stats {
 		let mut q = Quantogram::new();
 		q.add_unweighted_samples(samples.iter());
 
-		// Grab the deviation of the full set. (This is a better representation
-		// of variation than if we pulled it only from the valid set.)
+		// Grab the deviation of the full set.
 		let deviation = q.stddev().ok_or(BrunchError::Overflow)?;
+		let (mean, valid) =
+			// No deviation means no outliers.
+			if util::float_eq(deviation, 0.0) {
+				let mean = q.mean().ok_or(BrunchError::Overflow)?;
+				(mean, total)
+			}
+			// Weed out the weirdos.
+			else {
+				// Determine outlier range (+- 5%).
+				let q1 = q.fussy_quantile(0.05, 2.0).ok_or(BrunchError::Overflow)?;
+				let q3 = q.fussy_quantile(0.95, 2.0).ok_or(BrunchError::Overflow)?;
+				let iqr = q3 - q1;
 
-		// Determine outlier range (+- 5%).
-		let q1 = q.fussy_quantile(0.05, 2.0).ok_or(BrunchError::Overflow)?;
-		let q3 = q.fussy_quantile(0.95, 2.0).ok_or(BrunchError::Overflow)?;
-		let iqr = q3 - q1;
+				// Low and high boundaries.
+				let lo = iqr.mul_add(-1.5, q1);
+				let hi = iqr.mul_add(1.5, q3);
 
-		// Low and high boundaries.
-		let lo = iqr.mul_add(-1.5, q1);
-		let hi = iqr.mul_add(1.5, q3);
+				// Remove outliers.
+				samples.retain(|&s| util::float_le(lo, s) && util::float_le(s, hi));
 
-		samples.retain(|&s| lo <= s && s <= hi);
+				let valid = samples.len();
+				if valid < MIN_SAMPLES { return Err(BrunchError::TooWild); }
 
-		let valid = samples.len();
-		if valid < MIN_SAMPLES { return Err(BrunchError::TooWild); }
-
-		// Find the new mean.
-		q = Quantogram::new();
-		q.add_unweighted_samples(samples.iter());
-		let mean = q.mean().ok_or(BrunchError::Overflow)?;
+				// Find the new mean.
+				q = Quantogram::new();
+				q.add_unweighted_samples(samples.iter());
+				let mean = q.mean().ok_or(BrunchError::Overflow)?;
+				(mean, valid)
+			};
 
 		// Done!
-		Ok(Self{ total, valid, deviation, mean })
+		let out = Self { total, valid, deviation, mean };
+		if out.is_valid() { Ok(out) }
+		else { Err(BrunchError::Overflow) }
 	}
 }
 
@@ -277,8 +289,8 @@ impl Stats {
 	pub(crate) fn is_deviant(self, other: Self) -> Option<String> {
 		let dev = 2.0 * self.deviation;
 		if
-			matches!(other.mean.total_cmp(&(self.mean - dev)), Ordering::Less) ||
-			matches!(other.mean.total_cmp(&(self.mean + dev)), Ordering::Greater)
+			util::float_lt(other.mean, self.mean - dev) ||
+			util::float_gt(other.mean, self.mean + dev)
 		{
 			let (color, sign, diff) = match self.mean.total_cmp(&other.mean) {
 				Ordering::Less => (92, "-", other.mean - self.mean),
@@ -302,9 +314,9 @@ impl Stats {
 		MIN_SAMPLES <= self.valid &&
 		self.valid <= self.total &&
 		self.deviation.is_finite() &&
-		matches!(self.deviation.total_cmp(&0.0), Ordering::Equal | Ordering::Greater) &&
+		util::float_ge(self.deviation, 0.0) &&
 		self.mean.is_finite() &&
-		matches!(self.mean.total_cmp(&0.0), Ordering::Equal | Ordering::Greater)
+		util::float_ge(self.mean, 0.0)
 	}
 }
 
@@ -363,14 +375,12 @@ mod tests {
 		// Make sure we end up where we began.
 		assert_eq!(stat.total, d.total, "Deserialization changed total.");
 		assert_eq!(stat.valid, d.valid, "Deserialization changed valid.");
-		assert_eq!(
-			stat.deviation.total_cmp(&d.deviation),
-			Ordering::Equal,
+		assert!(
+			util::float_eq(stat.deviation, d.deviation),
 			"Deserialization changed deviation."
 		);
-		assert_eq!(
-			stat.mean.total_cmp(&d.mean),
-			Ordering::Equal,
+		assert!(
+			util::float_eq(stat.mean, d.mean),
 			"Deserialization changed mean."
 		);
 	}
