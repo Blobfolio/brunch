@@ -244,12 +244,12 @@ impl TryFrom<Vec<Duration>> for Stats {
 		q.add_unweighted_samples(samples.iter());
 
 		// Grab the deviation of the full set.
-		let deviation = q.stddev().ok_or(BrunchError::Overflow)?;
-		let (mean, valid) =
+		let mut deviation = q.stddev().ok_or(BrunchError::Overflow)?;
+		let mut valid = total;
+		let mean =
 			// No deviation means no outliers.
 			if util::float_eq(deviation, 0.0) {
-				let mean = q.mean().ok_or(BrunchError::Overflow)?;
-				(mean, total)
+				q.mean().ok_or(BrunchError::Overflow)?
 			}
 			// Weed out the weirdos.
 			else {
@@ -265,14 +265,15 @@ impl TryFrom<Vec<Duration>> for Stats {
 				// Remove outliers.
 				samples.retain(|&s| util::float_le(lo, s) && util::float_le(s, hi));
 
-				let valid = samples.len();
+				valid = samples.len();
 				if valid < MIN_SAMPLES { return Err(BrunchError::TooWild); }
 
 				// Find the new mean.
 				q = Quantogram::new();
 				q.add_unweighted_samples(samples.iter());
 				let mean = q.mean().ok_or(BrunchError::Overflow)?;
-				(mean, valid)
+				deviation = q.stddev().ok_or(BrunchError::Overflow)?;
+				mean
 			};
 
 		// Done!
@@ -333,7 +334,7 @@ impl Stats {
 			}
 			else { "s " };
 
-		// Get the top half.
+		// Convert the whole and fractional parts to integers.
 		let trunc = u32::from_f64(mean.trunc()).unwrap_or_default();
 		let fract = u8::from_f64((mean.fract() * 100.0).trunc()).unwrap_or_default();
 
