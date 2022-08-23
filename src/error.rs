@@ -41,7 +41,7 @@ impl fmt::Display for BrunchError {
 		match self {
 			Self::DupeName => f.write_str("Benchmark names must be unique."),
 			Self::NoBench => f.write_str("At least one benchmark is required."),
-			Self::NoRun => f.write_str("Missing \x1b[1;38;5;14mBench::run\x1b[0m."),
+			Self::NoRun => f.write_str("Missing \x1b[1;96mBench::run\x1b[0m."),
 			Self::Overflow => f.write_str("Unable to crunch the numbers."),
 			Self::TooFast => f.write_str("Too fast to benchmark!"),
 			Self::TooSmall(n) => write!(

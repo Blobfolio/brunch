@@ -464,7 +464,7 @@ impl Default for Table {
 	fn default() -> Self {
 		Self(vec![
 			TableRow::Normal(
-				"\x1b[1;38;5;13mMethod".to_owned(),
+				"\x1b[1;95mMethod".to_owned(),
 				"Mean".to_owned(),
 				"Change".to_owned(),
 				"Samples\x1b[0m".to_owned()
@@ -482,7 +482,7 @@ impl fmt::Display for Table {
 
 		// Pre-generate the full-width spacer content.
 		let spacer = format!(
-			"\x1b[38;5;5m{}\x1b[0m\n",
+			"\x1b[35m{}\x1b[0m\n",
 			"-".repeat(w1 + w2 + w3 + w4 + 12)
 		);
 
@@ -527,7 +527,7 @@ impl Table {
 						.unwrap_or_else(|| NO_CHANGE.to_owned());
 					let (valid, total) = s.samples();
 					let samples = format!(
-						"\x1b[2m{}\x1b[0;38;5;5m/\x1b[0;2m{}\x1b[0m",
+						"\x1b[2m{}\x1b[0;35m/\x1b[0;2m{}\x1b[0m",
 						NiceU64::from(valid),
 						NiceU64::from(total),
 					);
