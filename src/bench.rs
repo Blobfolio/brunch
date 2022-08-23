@@ -618,22 +618,47 @@ impl TableRow {
 /// This approach won't scale well, but the bench count for any given set
 /// should be relatively low.
 fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
+	let len = name.len();
+
 	// Find the first unique char occurrence.
-	let pos: usize = names.iter()
+	let mut pos: usize = names.iter()
 		.filter_map(|other|
 			if name.eq(other) { None }
 			else {
 				name.iter()
 					.zip(other.iter())
 					.position(|(l, r)| l != r)
-					.or_else(|| Some(name.len().min(other.len())))
+					.or_else(|| Some(len.min(other.len())))
 			}
 		)
 		.max()
 		.unwrap_or_default();
 
+	if 0 < pos && pos < len && ! matches!(name[pos], ':' | '(') {
+		// Let's rewind the marker to the position before the last : or (.
+		if let Some(pos2) = name[..pos].iter().rposition(|c| matches!(c, ':' | '(')) {
+			pos = name[..pos2].iter()
+				.rposition(|c| ! matches!(c, ':' | '('))
+				.map_or(0, |p| p + 1);
+		}
+		// Before the last _ or space?
+		else if let Some(pos2) = name[..pos].iter().rposition(|c| matches!(c, '_' | ' ')) {
+			pos = name[..pos2].iter()
+				.rposition(|c| ! matches!(c, '_' | ' '))
+				.map_or(0, |p| p + 1);
+		}
+		// Remove the marker entirely.
+		else { pos = 0; }
+	}
+
 	if pos == 0 {
 		"\x1b[94m".chars()
+			.chain(name.into_iter())
+			.chain("\x1b[0m".chars())
+			.collect()
+	}
+	else if pos == len {
+		"\x1b[34m".chars()
 			.chain(name.into_iter())
 			.chain("\x1b[0m".chars())
 			.collect()
