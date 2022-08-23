@@ -632,7 +632,12 @@ fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
 		.max()
 		.unwrap_or_default();
 
-	if pos == 0 { name.into_iter().collect() }
+	if pos == 0 {
+		"\x1b[94m".chars()
+			.chain(name.into_iter())
+			.chain("\x1b[0m".chars())
+			.collect()
+	}
 	else {
 		let b = name.split_off(pos);
 		"\x1b[34m".chars()
