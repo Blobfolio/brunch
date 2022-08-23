@@ -1,6 +1,6 @@
 [package]
 name = "brunch"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.61"
