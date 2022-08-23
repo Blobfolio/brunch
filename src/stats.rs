@@ -362,7 +362,7 @@ impl Stats {
 ///
 /// Return the file path history should be written to or read from.
 fn history_path() -> Option<PathBuf> {
-	if std::env::var_os("NO_BRUNCH_HISTORY").is_some() { None }
+	if std::env::var("NO_BRUNCH_HISTORY").map_or(false, |s| s.trim() == "1") { None }
 	else {
 		let mut p = try_dir(std::env::var_os("BRUNCH_DIR"))
 			.or_else(|| try_dir(Some(std::env::temp_dir())))?;

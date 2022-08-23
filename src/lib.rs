@@ -71,7 +71,7 @@ harness = false
 
 The following optional environmental variables are supported:
 
-* `NO_BRUNCH_HISTORY`: don't save or load run-to-run history data;
+* `NO_BRUNCH_HISTORY=1`: don't save or load run-to-run history data;
 * `BRUNCH_DIR=/some/directory`: save run-to-run history data to this folder instead of [`std::env::temp_dir`];
 
 

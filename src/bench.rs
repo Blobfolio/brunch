@@ -598,7 +598,7 @@ impl TableRow {
 /// This approach won't scale well, but the bench count for any given set
 /// should be relatively low.
 fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
-	// Find the point at which the content is totally unique.
+	// Find the first unique char occurrence.
 	let pos: usize = names.iter()
 		.filter_map(|other|
 			name.iter()
