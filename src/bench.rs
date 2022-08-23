@@ -188,8 +188,27 @@ impl Bench {
 		let name = name.as_ref().trim();
 		assert!(! name.is_empty(), "Name is required.");
 
+		// Compact and normalize whitespace, but otherwise pass whatever the
+		// name is on through.
+		let mut ws = false;
+		let name = name.chars()
+			.filter_map(|c|
+				if c.is_whitespace() {
+					if ws { None }
+					else {
+						ws = true;
+						Some(' ')
+					}
+				}
+				else {
+					ws = false;
+					Some(c)
+				}
+			)
+			.collect();
+
 		Self {
-			name: name.to_owned(),
+			name,
 			samples: DEFAULT_SAMPLES,
 			timeout: DEFAULT_TIMEOUT,
 			stats: None,
