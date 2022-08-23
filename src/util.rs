@@ -2,8 +2,6 @@
 # Brunch: Utility Functions
 */
 
-use dactyl::NiceU32;
-use num_traits::FromPrimitive;
 use std::cmp::Ordering;
 use unicode_width::UnicodeWidthChar;
 
@@ -50,38 +48,6 @@ pub(crate) fn float_ge(a: f64, b: f64) -> bool {
 /// # Float > Float.
 pub(crate) fn float_gt(a: f64, b: f64) -> bool {
 	matches!(a.total_cmp(&b), Ordering::Greater)
-}
-
-/// # Format w/ Unit.
-///
-/// Give us a nice comma-separated integer with two decimal places and an
-/// appropriate unit (running from pico seconds to milliseconds).
-pub(crate) fn format_time(mut time: f64) -> String {
-	let unit: &str =
-		if float_lt(time, 0.000_001) {
-			time *= 1_000_000_000.000;
-			"ns"
-		}
-		else if float_lt(time, 0.001) {
-			time *= 1_000_000.000;
-			"\u{3bc}s"
-		}
-		else if float_lt(time, 1.0) {
-			time *= 1_000.000;
-			"ms"
-		}
-		else if float_lt(time, 60.0) { "s " }
-		else {
-			time /= 60.0;
-			"m "
-		};
-
-	format!(
-		"\x1b[1m{}.{:02} {}\x1b[0m",
-		NiceU32::from(u32::from_f64(time.trunc()).unwrap_or_default()).as_str(),
-		u8::from_f64((time.fract() * 100.0).trunc()).unwrap_or_default(),
-		unit
-	)
 }
 
 /// # Width.

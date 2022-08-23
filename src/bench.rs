@@ -457,7 +457,7 @@ impl fmt::Display for Table {
 			let (c1, c2, c3, c4) = v.lens();
 			match v {
 				TableRow::Normal(a, b, c, d) => writeln!(
-					f, "{}{}    {}{}    {}{}    {}{}",
+					f, "{}{}    {}\x1b[1m{}\x1b[0m    {}{}    {}{}",
 					a, &pad[..w1 - c1],
 					&pad[..w2 - c2], b,
 					&pad[..w3 - c3], c,
@@ -483,14 +483,15 @@ impl Table {
 			let name = format_name(&src.name);
 			match src.stats.unwrap_or(Err(BrunchError::NoRun)) {
 				Ok(s) => {
-					let time = util::format_time(s.mean);
+					let time = s.nice_mean();
 					let diff = history.get(&src.name)
 						.and_then(|h| s.is_deviant(h))
 						.unwrap_or_else(|| NO_CHANGE.to_owned());
+					let (valid, total) = s.samples();
 					let samples = format!(
 						"\x1b[2m{}\x1b[0;38;5;5m/\x1b[0;2m{}\x1b[0m",
-						NiceU64::from(s.valid),
-						NiceU64::from(s.total),
+						NiceU64::from(valid),
+						NiceU64::from(total),
 					);
 
 					self.0.push(TableRow::Normal(name, time, diff, samples));

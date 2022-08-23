@@ -7,7 +7,11 @@ use crate::{
 	MIN_SAMPLES,
 	util,
 };
-use dactyl::NicePercent;
+use dactyl::{
+	NicePercent,
+	NiceU32,
+};
+use num_traits::FromPrimitive;
 use quantogram::Quantogram;
 use serde::{
 	de,
@@ -89,16 +93,16 @@ impl History {
 /// # Runtime Stats!
 pub(crate) struct Stats {
 	/// # Total Samples.
-	pub(crate) total: usize,
+	total: usize,
 
 	/// # Valid Samples.
-	pub(crate) valid: usize,
+	valid: usize,
 
 	/// # Standard Deviation.
 	deviation: f64,
 
 	/// # Mean Duration of Valid Samples.
-	pub(crate) mean: f64,
+	mean: f64,
 }
 
 impl<'de> Deserialize<'de> for Stats {
@@ -308,6 +312,38 @@ impl Stats {
 
 		None
 	}
+
+	/// # Nice Mean.
+	///
+	/// Return the mean rescaled to the most appropriate unit.
+	pub(crate) fn nice_mean(self) -> String {
+		let mut mean = self.mean;
+		let unit: &str =
+			if util::float_lt(mean, 0.000_001) {
+				mean *= 1_000_000_000.000;
+				"ns"
+			}
+			else if util::float_lt(mean, 0.001) {
+				mean *= 1_000_000.000;
+				"\u{3bc}s"
+			}
+			else if util::float_lt(mean, 1.0) {
+				mean *= 1_000.000;
+				"ms"
+			}
+			else { "s " };
+
+		// Get the top half.
+		let trunc = u32::from_f64(mean.trunc()).unwrap_or_default();
+		let fract = u8::from_f64((mean.fract() * 100.0).trunc()).unwrap_or_default();
+
+		format!("{}.{:02} {}", NiceU32::from(trunc), fract, unit)
+	}
+
+	/// # Samples.
+	///
+	/// Return the valid/total samples.
+	pub(crate) const fn samples(self) -> (usize, usize) { (self.valid, self.total) }
 
 	/// # Is Valid?
 	fn is_valid(self) -> bool {
