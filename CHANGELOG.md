@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [0.3.2](https://github.com/Blobfolio/brunch/releases/tag/v0.3.2) - 2022-08-23
+
+### Changes
+
+* One _final_ coloration tweak. (Sorry for the release spam!)
+
+
+
 ## [0.3.1](https://github.com/Blobfolio/brunch/releases/tag/v0.3.1) - 2022-08-23
 
 ### Changes
