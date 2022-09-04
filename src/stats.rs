@@ -9,7 +9,7 @@ use crate::{
 };
 use dactyl::{
 	NicePercent,
-	NiceU32,
+	NiceU64,
 };
 use num_traits::FromPrimitive;
 use quantogram::Quantogram;
@@ -292,11 +292,9 @@ impl Stats {
 	/// In practice, that means the absolute difference is greater than one
 	/// percent, and the old mean falls outside this run's valid range.
 	pub(crate) fn is_deviant(self, other: Self) -> Option<String> {
-		let dev = 2.0 * self.deviation;
-		if
-			util::float_lt(other.mean, self.mean - dev) ||
-			util::float_gt(other.mean, self.mean + dev)
-		{
+		let lo = self.deviation.mul_add(-2.0, self.mean);
+		let hi = self.deviation.mul_add(2.0, self.mean);
+		if util::float_lt(other.mean, lo) || util::float_gt(other.mean, hi) {
 			let (color, sign, diff) = match self.mean.total_cmp(&other.mean) {
 				Ordering::Less => (92, "-", other.mean - self.mean),
 				Ordering::Equal => return None,
@@ -318,27 +316,28 @@ impl Stats {
 	///
 	/// Return the mean rescaled to the most appropriate unit.
 	pub(crate) fn nice_mean(self) -> String {
-		let mut mean = self.mean;
-		let unit: &str =
-			if util::float_lt(mean, 0.000_001) {
-				mean *= 1_000_000_000.000;
-				"ns"
+		// Note: the multipliers are all 100x larger than they "should" be to
+		// bring two decimal places along for the ride. (The fewer ops we do on
+		// floats, the more accurate they'll be.)
+		let (mean, unit) =
+			if util::float_lt(self.mean, 0.000_001) {
+				(self.mean * 100_000_000_000.0, "ns")
 			}
-			else if util::float_lt(mean, 0.001) {
-				mean *= 1_000_000.000;
-				"\u{3bc}s"
+			else if util::float_lt(self.mean, 0.001) {
+				(self.mean * 100_000_000.0, "\u{3bc}s")
 			}
-			else if util::float_lt(mean, 1.0) {
-				mean *= 1_000.000;
-				"ms"
+			else if util::float_lt(self.mean, 1.0) {
+				(self.mean * 100_000.0, "ms")
 			}
-			else { "s " };
+			else {
+				(self.mean * 100.0, "s ")
+			};
 
-		// Convert the whole and fractional parts to integers.
-		let trunc = u32::from_f64(mean.trunc()).unwrap_or_default();
-		let fract = u8::from_f64((mean.fract() * 100.0).trunc()).unwrap_or_default();
+		// Break out the integer/fractional bits.
+		let mean = u64::from_f64(mean.round()).unwrap_or_default();
+		let (top, bottom) = dactyl::div_mod(mean, 100);
 
-		format!("\x1b[0;1m{}.{:02} {}\x1b[0m", NiceU32::from(trunc), fract, unit)
+		format!("\x1b[0;1m{}.{:02} {}\x1b[0m", NiceU64::from(top), bottom, unit)
 	}
 
 	/// # Samples.
