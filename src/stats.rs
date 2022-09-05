@@ -3,6 +3,7 @@
 */
 
 use crate::{
+	Abacus,
 	BrunchError,
 	MIN_SAMPLES,
 	util,
@@ -12,7 +13,6 @@ use dactyl::{
 	NiceU64,
 };
 use num_traits::FromPrimitive;
-use quantogram::Quantogram;
 use serde::{
 	de,
 	Deserialize,
@@ -234,47 +234,17 @@ impl TryFrom<Vec<Duration>> for Stats {
 			return Err(BrunchError::TooSmall(total));
 		}
 
-		// Convert to floats.
-		let mut samples: Vec<f64> = samples.into_iter()
-			.map(|d| d.as_secs_f64())
-			.collect();
+		// Crunch!
+		let mut calc = Abacus::from(samples);
+		calc.prune_outliers();
 
-		// Add the samples to the calculator.
-		let mut q = Quantogram::new();
-		q.add_unweighted_samples(samples.iter());
+		let valid = calc.len();
+		if valid < MIN_SAMPLES {
+			return Err(BrunchError::TooWild);
+		}
 
-		// Grab the deviation of the full set.
-		let mut deviation = q.stddev().ok_or(BrunchError::Overflow)?;
-		let mut valid = total;
-		let mean =
-			// No deviation means no outliers.
-			if util::float_eq(deviation, 0.0) {
-				q.mean().ok_or(BrunchError::Overflow)?
-			}
-			// Weed out the weirdos.
-			else {
-				// Determine outlier range (+- 5%).
-				let q1 = q.fussy_quantile(0.05, 2.0).ok_or(BrunchError::Overflow)?;
-				let q3 = q.fussy_quantile(0.95, 2.0).ok_or(BrunchError::Overflow)?;
-				let iqr = q3 - q1;
-
-				// Low and high boundaries.
-				let lo = iqr.mul_add(-1.5, q1);
-				let hi = iqr.mul_add(1.5, q3);
-
-				// Remove outliers.
-				samples.retain(|&s| util::float_le(lo, s) && util::float_le(s, hi));
-
-				valid = samples.len();
-				if valid < MIN_SAMPLES { return Err(BrunchError::TooWild); }
-
-				// Find the new mean.
-				q = Quantogram::new();
-				q.add_unweighted_samples(samples.iter());
-				let mean = q.mean().ok_or(BrunchError::Overflow)?;
-				deviation = q.stddev().ok_or(BrunchError::Overflow)?;
-				mean
-			};
+		let mean = calc.mean();
+		let deviation = calc.deviation();
 
 		// Done!
 		let out = Self { total, valid, deviation, mean };

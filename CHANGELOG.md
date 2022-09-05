@@ -1,9 +1,18 @@
 # Changelog
 
 
+
+## [0.3.3](https://github.com/Blobfolio/brunch/releases/tag/v0.3.3) - TBD
+
+### Changed
+
+* Internalize/simplify math (drop `quantogram` dependency)
+
+
+
 ## [0.3.2](https://github.com/Blobfolio/brunch/releases/tag/v0.3.2) - 2022-08-23
 
-### Changes
+### Changed
 
 * One _final_ coloration tweak. (Sorry for the release spam!)
 
@@ -11,7 +20,7 @@
 
 ## [0.3.1](https://github.com/Blobfolio/brunch/releases/tag/v0.3.1) - 2022-08-23
 
-### Changes
+### Changed
 
 * Coloration tweaks;
 * Improved float handling;
