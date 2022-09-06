@@ -8,11 +8,10 @@ use crate::{
 	MIN_SAMPLES,
 };
 use dactyl::{
+	NiceFloat,
 	NicePercent,
-	NiceU64,
 	total_cmp,
 };
-use num_traits::FromPrimitive;
 use serde::{
 	de,
 	Deserialize,
@@ -286,28 +285,21 @@ impl Stats {
 	///
 	/// Return the mean rescaled to the most appropriate unit.
 	pub(crate) fn nice_mean(self) -> String {
-		// Note: the multipliers are all 100x larger than they "should" be to
-		// bring two decimal places along for the ride. (The fewer ops we do on
-		// floats, the more accurate they'll be.)
 		let (mean, unit) =
 			if total_cmp!((self.mean) < 0.000_001) {
-				(self.mean * 100_000_000_000.0, "ns")
+				(self.mean * 1_000_000_000.0, "ns")
 			}
 			else if total_cmp!((self.mean) < 0.001) {
-				(self.mean * 100_000_000.0, "\u{3bc}s")
+				(self.mean * 1_000_000.0, "\u{3bc}s")
 			}
 			else if total_cmp!((self.mean) < 1.0) {
-				(self.mean * 100_000.0, "ms")
+				(self.mean * 1_000.0, "ms")
 			}
 			else {
-				(self.mean * 100.0, "s ")
+				(self.mean, "s ")
 			};
 
-		// Break out the integer/fractional bits.
-		let mean = u64::from_f64(mean.round()).unwrap_or_default();
-		let (top, bottom) = dactyl::div_mod(mean, 100);
-
-		format!("\x1b[0;1m{}.{:02} {}\x1b[0m", NiceU64::from(top), bottom, unit)
+		format!("\x1b[0;1m{} {}\x1b[0m", NiceFloat::from(mean).precise_str(2), unit)
 	}
 
 	/// # Samples.

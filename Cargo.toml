@@ -32,11 +32,6 @@ serde = "1.0.*"
 serde_json = "1.0.*"
 unicode-width = "0.1.*"
 
-[dependencies.num-traits]
-version = "0.2.*"
-default-features = false
-features = [ "std", "i128" ]
-
 [dev-dependencies]
 quantogram = "=0.4.4"
 
