@@ -6,11 +6,11 @@ use crate::{
 	Abacus,
 	BrunchError,
 	MIN_SAMPLES,
-	util,
 };
 use dactyl::{
 	NicePercent,
 	NiceU64,
+	total_cmp,
 };
 use num_traits::FromPrimitive;
 use serde::{
@@ -264,7 +264,7 @@ impl Stats {
 	pub(crate) fn is_deviant(self, other: Self) -> Option<String> {
 		let lo = self.deviation.mul_add(-2.0, self.mean);
 		let hi = self.deviation.mul_add(2.0, self.mean);
-		if util::float_lt(other.mean, lo) || util::float_gt(other.mean, hi) {
+		if total_cmp!((other.mean) < lo) || total_cmp!((other.mean) > hi) {
 			let (color, sign, diff) = match self.mean.total_cmp(&other.mean) {
 				Ordering::Less => (92, "-", other.mean - self.mean),
 				Ordering::Equal => return None,
@@ -290,13 +290,13 @@ impl Stats {
 		// bring two decimal places along for the ride. (The fewer ops we do on
 		// floats, the more accurate they'll be.)
 		let (mean, unit) =
-			if util::float_lt(self.mean, 0.000_001) {
+			if total_cmp!((self.mean) < 0.000_001) {
 				(self.mean * 100_000_000_000.0, "ns")
 			}
-			else if util::float_lt(self.mean, 0.001) {
+			else if total_cmp!((self.mean) < 0.001) {
 				(self.mean * 100_000_000.0, "\u{3bc}s")
 			}
-			else if util::float_lt(self.mean, 1.0) {
+			else if total_cmp!((self.mean) < 1.0) {
 				(self.mean * 100_000.0, "ms")
 			}
 			else {
@@ -320,9 +320,9 @@ impl Stats {
 		MIN_SAMPLES <= self.valid &&
 		self.valid <= self.total &&
 		self.deviation.is_finite() &&
-		util::float_ge(self.deviation, 0.0) &&
+		total_cmp!((self.deviation) >= 0.0) &&
 		self.mean.is_finite() &&
-		util::float_ge(self.mean, 0.0)
+		total_cmp!((self.mean) >= 0.0)
 	}
 }
 
@@ -382,11 +382,11 @@ mod tests {
 		assert_eq!(stat.total, d.total, "Deserialization changed total.");
 		assert_eq!(stat.valid, d.valid, "Deserialization changed valid.");
 		assert!(
-			util::float_eq(stat.deviation, d.deviation),
+			total_cmp!((stat.deviation) == (d.deviation)),
 			"Deserialization changed deviation."
 		);
 		assert!(
-			util::float_eq(stat.mean, d.mean),
+			total_cmp!((stat.mean) == (d.mean)),
 			"Deserialization changed mean."
 		);
 	}

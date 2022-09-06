@@ -2,7 +2,7 @@
 # Brunch: Math
 */
 
-use crate::util;
+use dactyl::total_cmp;
 use std::{
 	cmp::Ordering,
 	time::Duration,
@@ -121,7 +121,7 @@ impl Abacus {
 			let hi = iqr.mul_add(1.5, q3);
 
 			// Remove outliers.
-			self.set.retain(|&s| util::float_le(lo, s) && util::float_le(s, hi));
+			self.set.retain(|&s| total_cmp!(lo <= s) && total_cmp!(s <= hi));
 
 			// Recalculate totals if the length changed.
 			let len = self.set.len();
@@ -141,7 +141,7 @@ impl Abacus {
 	fn count_above(&self, num: f64) -> usize {
 		self.set.iter()
 			.rev()
-			.take_while(|n| util::float_gt(**n, num))
+			.take_while(|&&n| total_cmp!(n > num))
 			.count()
 	}
 
@@ -150,7 +150,7 @@ impl Abacus {
 	/// Return the total number of entries with values lower than the target.
 	fn count_below(&self, num: f64) -> usize {
 		self.set.iter()
-			.take_while(|n| util::float_lt(**n, num))
+			.take_while(|&&n| total_cmp!(n < num))
 			.count()
 	}
 
@@ -269,7 +269,7 @@ impl Abacus {
 	/// Return the largest entry in the set with a value lower than the target,
 	/// if any.
 	fn step_down(&self, num: f64) -> Option<f64> {
-		let pos = self.set.iter().position(|n| util::float_eq(*n, num))?;
+		let pos = self.set.iter().position(|&n| total_cmp!(n == num))?;
 		if 0 < pos { Some(self.set[pos - 1]) }
 		else { None }
 	}
@@ -279,7 +279,7 @@ impl Abacus {
 	/// Return the smallest entry in the set with a value larger than the
 	/// target, if any.
 	fn step_up(&self, num: f64) -> Option<f64> {
-		let pos = self.set.iter().rposition(|n| util::float_eq(*n, num))?;
+		let pos = self.set.iter().rposition(|&n| total_cmp!(n == num))?;
 		if pos + 1 < self.len { Some(self.set[pos + 1]) }
 		else { None }
 	}
@@ -295,7 +295,7 @@ impl Abacus {
 /// Note: values must be pre-sorted.
 fn count_unique(src: &[f64]) -> usize {
 	let mut unique = src.to_vec();
-	unique.dedup_by(|a, b| util::float_eq(*a, *b));
+	unique.dedup_by(|a, b| total_cmp!(a == b));
 	unique.len()
 }
 
