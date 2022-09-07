@@ -3,16 +3,15 @@
 */
 
 use crate::{
+	Abacus,
 	BrunchError,
 	MIN_SAMPLES,
-	util,
 };
 use dactyl::{
+	NiceFloat,
 	NicePercent,
-	NiceU32,
+	total_cmp,
 };
-use num_traits::FromPrimitive;
-use quantogram::Quantogram;
 use serde::{
 	de,
 	Deserialize,
@@ -234,47 +233,17 @@ impl TryFrom<Vec<Duration>> for Stats {
 			return Err(BrunchError::TooSmall(total));
 		}
 
-		// Convert to floats.
-		let mut samples: Vec<f64> = samples.into_iter()
-			.map(|d| d.as_secs_f64())
-			.collect();
+		// Crunch!
+		let mut calc = Abacus::from(samples);
+		calc.prune_outliers();
 
-		// Add the samples to the calculator.
-		let mut q = Quantogram::new();
-		q.add_unweighted_samples(samples.iter());
+		let valid = calc.len();
+		if valid < MIN_SAMPLES {
+			return Err(BrunchError::TooWild);
+		}
 
-		// Grab the deviation of the full set.
-		let mut deviation = q.stddev().ok_or(BrunchError::Overflow)?;
-		let mut valid = total;
-		let mean =
-			// No deviation means no outliers.
-			if util::float_eq(deviation, 0.0) {
-				q.mean().ok_or(BrunchError::Overflow)?
-			}
-			// Weed out the weirdos.
-			else {
-				// Determine outlier range (+- 5%).
-				let q1 = q.fussy_quantile(0.05, 2.0).ok_or(BrunchError::Overflow)?;
-				let q3 = q.fussy_quantile(0.95, 2.0).ok_or(BrunchError::Overflow)?;
-				let iqr = q3 - q1;
-
-				// Low and high boundaries.
-				let lo = iqr.mul_add(-1.5, q1);
-				let hi = iqr.mul_add(1.5, q3);
-
-				// Remove outliers.
-				samples.retain(|&s| util::float_le(lo, s) && util::float_le(s, hi));
-
-				valid = samples.len();
-				if valid < MIN_SAMPLES { return Err(BrunchError::TooWild); }
-
-				// Find the new mean.
-				q = Quantogram::new();
-				q.add_unweighted_samples(samples.iter());
-				let mean = q.mean().ok_or(BrunchError::Overflow)?;
-				deviation = q.stddev().ok_or(BrunchError::Overflow)?;
-				mean
-			};
+		let mean = calc.mean();
+		let deviation = calc.deviation();
 
 		// Done!
 		let out = Self { total, valid, deviation, mean };
@@ -292,11 +261,9 @@ impl Stats {
 	/// In practice, that means the absolute difference is greater than one
 	/// percent, and the old mean falls outside this run's valid range.
 	pub(crate) fn is_deviant(self, other: Self) -> Option<String> {
-		let dev = 2.0 * self.deviation;
-		if
-			util::float_lt(other.mean, self.mean - dev) ||
-			util::float_gt(other.mean, self.mean + dev)
-		{
+		let lo = self.deviation.mul_add(-2.0, self.mean);
+		let hi = self.deviation.mul_add(2.0, self.mean);
+		if total_cmp!((other.mean) < lo) || total_cmp!((other.mean) > hi) {
 			let (color, sign, diff) = match self.mean.total_cmp(&other.mean) {
 				Ordering::Less => (92, "-", other.mean - self.mean),
 				Ordering::Equal => return None,
@@ -318,27 +285,21 @@ impl Stats {
 	///
 	/// Return the mean rescaled to the most appropriate unit.
 	pub(crate) fn nice_mean(self) -> String {
-		let mut mean = self.mean;
-		let unit: &str =
-			if util::float_lt(mean, 0.000_001) {
-				mean *= 1_000_000_000.000;
-				"ns"
+		let (mean, unit) =
+			if total_cmp!((self.mean) < 0.000_001) {
+				(self.mean * 1_000_000_000.0, "ns")
 			}
-			else if util::float_lt(mean, 0.001) {
-				mean *= 1_000_000.000;
-				"\u{3bc}s"
+			else if total_cmp!((self.mean) < 0.001) {
+				(self.mean * 1_000_000.0, "\u{3bc}s")
 			}
-			else if util::float_lt(mean, 1.0) {
-				mean *= 1_000.000;
-				"ms"
+			else if total_cmp!((self.mean) < 1.0) {
+				(self.mean * 1_000.0, "ms")
 			}
-			else { "s " };
+			else {
+				(self.mean, "s ")
+			};
 
-		// Convert the whole and fractional parts to integers.
-		let trunc = u32::from_f64(mean.trunc()).unwrap_or_default();
-		let fract = u8::from_f64((mean.fract() * 100.0).trunc()).unwrap_or_default();
-
-		format!("\x1b[0;1m{}.{:02} {}\x1b[0m", NiceU32::from(trunc), fract, unit)
+		format!("\x1b[0;1m{} {}\x1b[0m", NiceFloat::from(mean).precise_str(2), unit)
 	}
 
 	/// # Samples.
@@ -351,9 +312,9 @@ impl Stats {
 		MIN_SAMPLES <= self.valid &&
 		self.valid <= self.total &&
 		self.deviation.is_finite() &&
-		util::float_ge(self.deviation, 0.0) &&
+		total_cmp!((self.deviation) >= 0.0) &&
 		self.mean.is_finite() &&
-		util::float_ge(self.mean, 0.0)
+		total_cmp!((self.mean) >= 0.0)
 	}
 }
 
@@ -413,11 +374,11 @@ mod tests {
 		assert_eq!(stat.total, d.total, "Deserialization changed total.");
 		assert_eq!(stat.valid, d.valid, "Deserialization changed valid.");
 		assert!(
-			util::float_eq(stat.deviation, d.deviation),
+			total_cmp!((stat.deviation) == (d.deviation)),
 			"Deserialization changed deviation."
 		);
 		assert!(
-			util::float_eq(stat.mean, d.mean),
+			total_cmp!((stat.mean) == (d.mean)),
 			"Deserialization changed mean."
 		);
 	}

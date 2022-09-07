@@ -201,6 +201,7 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 mod bench;
 mod error;
 #[macro_use] mod macros;
+mod math;
 mod stats;
 pub(crate) mod util;
 
@@ -211,6 +212,7 @@ pub use bench::{
 	Benches,
 };
 pub use error::BrunchError;
+pub(crate) use math::Abacus;
 pub(crate) use stats::{
 	History,
 	Stats,
