@@ -2,11 +2,13 @@
 
 
 
-## [0.3.3](https://github.com/Blobfolio/brunch/releases/tag/v0.3.3) - TBD
+## [0.3.3](https://github.com/Blobfolio/brunch/releases/tag/v0.3.3) - 2022-09-06
 
 ### Changed
 
-* Internalize/simplify math (drop `quantogram` dependency)
+* Improved float handling;
+* Minor code cleanup, refactoring;
+* Drop `quantogram` dependency (it is now dev-only);
 
 
 
