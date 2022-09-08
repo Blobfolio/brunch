@@ -47,6 +47,7 @@ fn fibonacci_loop(len: usize) -> Vec<u32> {
 
 benches!(
 	Bench::new("fibonacci_recursive(30)")
+		.with_samples(1000)
 		.run(|| fibonacci_recursive(30_usize)),
 
 	Bench::new("fibonacci_loop(30)")
