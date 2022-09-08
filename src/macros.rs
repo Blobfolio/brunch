@@ -6,7 +6,7 @@
 /// # Helper: Benchmarks
 ///
 /// This will generate a `main()` function, bootstrap, and run all supplied
-/// benches. Results will be saved and printed afterward nice and neat.
+/// benches. Results will be saved and printed afterward, nice and neat.
 ///
 /// See the main crate documentation for more information.
 ///
@@ -32,16 +32,33 @@ macro_rules! benches {
 	($($benches:expr),+ $(,)?) => {
 		/// # Benchmarks!
 		fn main() {
-			// This can take a while; give 'em a message of hope.
-			::std::eprint!("\x1b[1;38;5;199mStarting:\x1b[0m Running benchmark(s). Stand by!\n\n");
+			use ::std::io::Write;
+
+			let writer = ::std::io::stderr();
+			let mut handle = writer.lock();
+
+			// Announce that we've started.
+			let _res = handle.write_all(b"\x1b[1;38;5;199mStarting:\x1b[0m Running benchmark(s). Stand by!\n\n")
+				.and_then(|_| handle.flush());
 
 			// Run the benches.
 			let mut benches = $crate::Benches::default();
 			$(
-				::std::eprint!("\x1b[1;34m•\x1b[0m");
+				// Print a dot to show some progress.
+				let _res = handle.write_all(b"\x1b[1;34m\xe2\x80\xa2\x1b[0m")
+					.and_then(|_| handle.flush());
+
 				benches.push($benches);
 			)+
-			::std::eprintln!("\n");
+
+			// Print a line break.
+			let _res = handle.write_all(b"\n").and_then(|_| handle.flush());
+
+			// Cleanup.
+			drop(handle);
+			drop(writer);
+
+			// Finish!
 			benches.finish();
 		}
 	};
