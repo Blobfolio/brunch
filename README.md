@@ -126,7 +126,9 @@ brunch::benches!(
 );
 ```
 
-If you prefer to handle things manually, you'll need to use the `Benches` struct instead. It's pretty easy too:
+If you prefer to handle things manually — for example to perform one-time setup or resolve lifetime conflicts — you'll need to use the `Benches` struct directly instead.
+
+At any rate, it's easy:
 
 ```rust
 use brunch::{Benches, Bench};
