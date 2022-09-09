@@ -8,6 +8,7 @@ description = "A simple micro-benchmark runner."
 license = "WTFPL"
 repository = "https://github.com/Blobfolio/brunch"
 readme = "README.md"
+keywords = [ "benchmark", "profiling" ]
 exclude = [
 	".github",
 	".gitignore",
