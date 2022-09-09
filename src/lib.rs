@@ -2,9 +2,8 @@
 # Brunch
 
 [![Documentation](https://docs.rs/brunch/badge.svg)](https://docs.rs/brunch/)
+[![Changelog](https://img.shields.io/crates/v/brunch.svg?label=Changelog&color=9cf)](https://github.com/Blobfolio/brunch/blob/master/CHANGELOG.md)
 [![crates.io](https://img.shields.io/crates/v/brunch.svg)](https://crates.io/crates/brunch)
-[![Build Status](https://github.com/Blobfolio/brunch/workflows/Build/badge.svg)](https://github.com/Blobfolio/brunch/actions)
-[![Dependency Status](https://deps.rs/repo/github/blobfolio/brunch/status.svg)](https://deps.rs/repo/github/blobfolio/brunch)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/Blobfolio/brunch)
 
 
