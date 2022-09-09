@@ -2,6 +2,15 @@
 
 
 
+## [0.3.5](https://github.com/Blobfolio/brunch/releases/tag/v0.3.5) - TBD
+
+### Changed
+
+* Bump MSRV `1.63.0`
+
+
+
+
 ## [0.3.4](https://github.com/Blobfolio/brunch/releases/tag/v0.3.4) - 2022-09-09
 
 ### New
