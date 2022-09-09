@@ -6,7 +6,11 @@
 
 ### New
 
-* `benches!(inline: …)`  macro variant for use inside a custom `main()`.
+* `benches!(inline: …)`  macro variant for use inside a custom `main()`
+
+### Changed
+
+* Update dependencies
 
 
 

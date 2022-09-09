@@ -1,11 +1,11 @@
 # Project Dependencies
     Package:   brunch
-    Version:   0.3.3
-    Generated: 2022-09-07 03:56:19 UTC
+    Version:   0.3.4
+    Generated: 2022-09-09 07:51:44 UTC
 
 | Package | Version | Author(s) | License |
 | ---- | ---- | ---- | ---- |
-| [dactyl](https://github.com/Blobfolio/dactyl) | 0.4.4 | [Blobfolio, LLC.](mailto:hello@blobfolio.com) | WTFPL |
+| [dactyl](https://github.com/Blobfolio/dactyl) | 0.4.5 | [Blobfolio, LLC.](mailto:hello@blobfolio.com) | WTFPL |
 | [itoa](https://github.com/dtolnay/itoa) | 1.0.3 | [David Tolnay](mailto:dtolnay@gmail.com) | Apache-2.0 or MIT |
 | [num-traits](https://github.com/rust-num/num-traits) | 0.2.15 | The Rust Project Developers | Apache-2.0 or MIT |
 | [ryu](https://github.com/dtolnay/ryu) | 1.0.11 | [David Tolnay](mailto:dtolnay@gmail.com) | Apache-2.0 or BSL-1.0 |
