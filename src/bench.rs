@@ -33,10 +33,45 @@ const NO_CHANGE: &str = "\x1b[2m---\x1b[0m";
 /// # Benchmarks.
 ///
 /// This holds a collection of benchmarks. You don't need to interact with this
-/// directly when using the [`benches`](crate::benches) macro, but _do_ need to use it if
-/// manually constructing the `main()` method.
+/// directly when using the [`benches`](crate::benches) macro, but can if you
+/// want complete control over the whole process.
 ///
-/// Refer to the main documentation for examples.
+/// ## Examples
+///
+/// ```no_run
+/// use brunch::{Bench, Benches};
+/// use std::time::Duration;
+///
+/// fn main() {
+///     // You can do set up, etc., here.
+///     eprintln!("Starting benchmarks!");
+///
+///     // Start a Benches instance.
+///     let mut benches = Benches::default();
+///
+///     // Each Bench needs to be pushed one at a time.
+///     benches.push(
+///         Bench::new("2_usize.checked_add(2)")
+///             .run(|| 2_usize.checked_add(2))
+///     );
+///
+///     // Maybe you want to pause between each benchmark to let the CPU cool?
+///     std::thread::sleep(Duration::from_secs(3));
+///
+///     // Add another Bench.
+///     benches.push(
+///         Bench::new("200_usize.checked_mul(3)")
+///             .run(|| 200_usize.checked_mul(3))
+///     );
+///
+///     // After the last Bench has been added, call `finish` to crunch the
+///     // stats and print a summary.
+///     benches.finish();
+///
+///     // You can do other stuff afterward if you want.
+///     eprintln!("Done!");
+/// }
+/// ```
 pub struct Benches(Vec<Bench>);
 
 impl Extend<Bench> for Benches {
