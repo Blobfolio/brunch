@@ -53,3 +53,24 @@ benches!(
 	Bench::new("fibonacci_loop(30)")
 		.run(|| fibonacci_loop(30_usize)),
 );
+
+/*
+/// # Manual Main.
+///
+/// This shows how to achieve the same benchmark using the "inline" approach.
+///
+/// It isn't necessary for these particular benchmarks, but might be in cases
+/// where you want to run code before or after the `benches!` bit.
+fn main() {
+	benches!(
+		inline:
+
+		Bench::new("fibonacci_recursive(30)")
+			.with_samples(1000)
+			.run(|| fibonacci_recursive(30_usize)),
+
+		Bench::new("fibonacci_loop(30)")
+			.run(|| fibonacci_loop(30_usize)),
+	)
+}
+*/

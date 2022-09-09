@@ -2,6 +2,14 @@
 
 
 
+## [0.3.4](https://github.com/Blobfolio/brunch/releases/tag/v0.3.4) - 2022-09-09
+
+### New
+
+* `benches!(inline: …)`  macro variant for use inside a custom `main()`.
+
+
+
 ## [0.3.3](https://github.com/Blobfolio/brunch/releases/tag/v0.3.3) - 2022-09-06
 
 ### Changed

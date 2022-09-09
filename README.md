@@ -100,60 +100,58 @@ There is also a special `Bench::spacer` method that can be used to inject a line
 
 ### Examples
 
-In terms of running benchmarks, the simplest approach is to use the provided `benches` macro. That generates the required `main()` method, runs all the benches, and prints the results automatically.
+The `benches!` macro is the easiest way to run `Brunch` benchmarks.
+
+Simply pass a comma-separated list of all the `Bench` objects you want to run, and it will handle the setup, running, tabulation, and give you a nice summary at the end.
+
+By default, this macro will generate the `main()` entrypoint too, but you can suppress this by adding "inline:" as the first argument.
+
+Anyhoo, the default usage would look something like the following:
 
 ```rust
-use brunch::Bench;
-use dactyl::NiceU8;
+use brunch::{Bench, benches};
 
-/// # Silly seed method.
-fn max_u8() -> u8 { u8::MAX }
+// Example benchmark adding 2+2.
+fn callback() -> Option<usize> { 2_usize.checked_add(2) }
 
-brunch::benches!(
-    // Self-contained bench.
-    Bench::new("dactyl::NiceU8::from(0)")
-        .run(|| NiceU8::from(0_u8)),
+// Example benchmark multiplying 2x2.
+fn callback2() -> Option<usize> { 2_usize.checked_mul(2) }
 
-    // Clone-seeded bench.
-    Bench::new("dactyl::NiceU8::from(18)")
-        .run_seeded(18_u8, |num| NiceU8::from(num)),
+// Let the macro handle everything for you.
+benches!(
+    Bench::new("usize::checked_add(2)")
+        .run(callback),
 
-    // An example of a spacer, which just adds a line break.
-    Bench::spacer(),
-
-    // Callback-seeded bench.
-    Bench::new("dactyl::NiceU8::from(101)")
-        .run_seeded_with(max_u8, |num| NiceU8::from(num)),
+    Bench::new("usize::checked_mul(2)")
+        .run(callback2),
 );
 ```
 
-If you prefer to handle things manually — for example to perform one-time setup or resolve lifetime conflicts — you'll need to use the `Benches` struct directly instead.
-
-At any rate, it's easy:
+When declaring your own main entrypoint, you need to add "inline:" as the first argument. The list of `Bench` instances follow as usual after that.
 
 ```rust
-use brunch::{Benches, Bench};
-use dactyl::NiceU8;
+use brunch::{Bench, benches};
 
+/// # Custom Main.
 fn main() {
-    // Do any setup you want.
-    println!("This prints before any time-consuming work happens!");
+    // A typical use case for the "inline" variant would be to declare
+    // an owned variable for a benchmark that needs to return a reference
+    // (to e.g. keep Rust from complaining about lifetimes).
+    let v = vec![0_u8, 1, 2, 3, 4, 5];
 
-    // Initialize a mutable `Benches`.
-    let mut benches = Benches::default();
+    // The macro call goes here!
+    benches!(
+        inline:
 
-    // Push each `Bench` you have to it, one at a time (or use
-    // `benches.extend([Bench1, Bench2, ...])` to do many at once).
-    benches.push(
-        Bench::new("dactyl::NiceU8::from(0)").run(|| NiceU8::from(0_u8))
+        Bench::new("vec::as_slice()").run(|| v.as_slice()),
     );
 
-    // Call the `finish` method to crunch and print the results.
-    benches.finish();
-
-    // Do something else if you want to!
+    // You can also do other stuff afterwards if you want.
+    eprintln!("Done!");
 }
 ```
+
+For even more control over the flow, skip the macro and just use `Benches` directly.
 
 
 
