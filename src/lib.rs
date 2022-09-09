@@ -92,7 +92,7 @@ There is also a special [`Bench::spacer`] method that can be used to inject a li
 
 ### Examples
 
-The [`brunch::benches`] macro is the easiest way to run `Brunch` benchmarks.
+The [`benches`] macro is the easiest way to run `Brunch` benchmarks.
 
 Simply pass a comma-separated list of all the [`Bench`](crate::Bench) objects you want to run, and it will handle the setup, running, tabulation, and give you a nice summary at the end.
 
