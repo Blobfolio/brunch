@@ -9,10 +9,13 @@ use crate::{
 	Stats,
 	util,
 };
-use dactyl::NiceU64;
+use dactyl::{
+	NiceU32,
+	traits::SaturatingFrom,
+};
 use std::{
 	fmt,
-	num::NonZeroUsize,
+	num::NonZeroU32,
 	time::{
 		Duration,
 		Instant,
@@ -23,7 +26,7 @@ use std::{
 
 #[allow(unsafe_code)]
 /// # Safety: This is non-zero.
-const DEFAULT_SAMPLES: NonZeroUsize = unsafe { NonZeroUsize::new_unchecked(2500) };
+const DEFAULT_SAMPLES: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(2500) };
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 const NO_CHANGE: &str = "\x1b[2m---\x1b[0m";
 
@@ -192,7 +195,7 @@ impl Benches {
 /// documentation for more information.
 pub struct Bench {
 	name: String,
-	samples: NonZeroUsize,
+	samples: NonZeroU32,
 	timeout: Duration,
 	stats: Option<Result<Stats, BrunchError>>,
 }
@@ -232,7 +235,7 @@ impl Bench {
 		// Compact and normalize whitespace, but otherwise pass whatever the
 		// name is on through.
 		let mut ws = false;
-		let name = name.chars()
+		let name: String = name.chars()
 			.filter_map(|c|
 				if c.is_whitespace() {
 					if ws { None }
@@ -247,6 +250,8 @@ impl Bench {
 				}
 			)
 			.collect();
+
+		assert!(name.len() <= 65535, "Names cannot be longer than 65,535.");
 
 		Self {
 			name,
@@ -351,14 +356,14 @@ impl Bench {
     ///         .run(|| NiceU8::from(0_u8))
     /// );
 	/// ```
-	pub const fn with_samples(mut self, samples: usize) -> Self {
+	pub const fn with_samples(mut self, samples: u32) -> Self {
 		if samples < MIN_SAMPLES {
 			// Safety: ten is non-zero.
-			self.samples = unsafe { NonZeroUsize::new_unchecked(MIN_SAMPLES) };
+			self.samples = unsafe { NonZeroU32::new_unchecked(MIN_SAMPLES) };
 		}
 		else {
 			// Safety: anything 10+ is also non-zero.
-			self.samples = unsafe { NonZeroUsize::new_unchecked(samples) };
+			self.samples = unsafe { NonZeroU32::new_unchecked(samples) };
 		}
 		self
 	}
@@ -386,7 +391,7 @@ impl Bench {
 	where F: FnMut() -> O {
 		if self.is_spacer() { return self; }
 
-		let mut times: Vec<Duration> = Vec::with_capacity(self.samples.get());
+		let mut times: Vec<Duration> = Vec::with_capacity(usize::saturating_from(self.samples.get()));
 		let now = Instant::now();
 
 		for _ in 0..self.samples.get() {
@@ -426,7 +431,7 @@ impl Bench {
 	where F: FnMut(I) -> O, I: Clone {
 		if self.is_spacer() { return self; }
 
-		let mut times: Vec<Duration> = Vec::with_capacity(self.samples.get());
+		let mut times: Vec<Duration> = Vec::with_capacity(usize::saturating_from(self.samples.get()));
 		let now = Instant::now();
 
 		for _ in 0..self.samples.get() {
@@ -468,7 +473,7 @@ impl Bench {
 	where F1: FnMut() -> I, F2: FnMut(I) -> O {
 		if self.is_spacer() { return self; }
 
-		let mut times: Vec<Duration> = Vec::with_capacity(self.samples.get());
+		let mut times: Vec<Duration> = Vec::with_capacity(usize::saturating_from(self.samples.get()));
 		let now = Instant::now();
 
 		for _ in 0..self.samples.get() {
@@ -573,8 +578,8 @@ impl Table {
 					let (valid, total) = s.samples();
 					let samples = format!(
 						"\x1b[2m{}\x1b[0;35m/\x1b[0;2m{}\x1b[0m",
-						NiceU64::from(valid),
-						NiceU64::from(total),
+						NiceU32::from(valid),
+						NiceU32::from(total),
 					);
 
 					self.0.push(TableRow::Normal(name, time, samples, diff));

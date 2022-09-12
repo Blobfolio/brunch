@@ -2,7 +2,7 @@
 # Brunch
 */
 
-use dactyl::NiceU64;
+use dactyl::NiceU32;
 use std::fmt;
 
 
@@ -28,7 +28,7 @@ pub enum BrunchError {
 	TooFast,
 
 	/// # Not enough samples were collected to analyze.
-	TooSmall(usize),
+	TooSmall(u32),
 
 	/// # The samples were too chaotic to analyze.
 	TooWild,
@@ -46,7 +46,7 @@ impl fmt::Display for BrunchError {
 			Self::TooFast => f.write_str("Too fast to benchmark!"),
 			Self::TooSmall(n) => write!(
 				f, "Insufficient samples collected ({}); try increasing the timeout.",
-				NiceU64::from(*n),
+				NiceU32::from(*n),
 			),
 			Self::TooWild => f.write_str("Samples too wild to analyze."),
 		}

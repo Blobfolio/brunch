@@ -7,7 +7,9 @@
 ### Changed
 
 * Bump MSRV `1.63.0`
-
+* Drop `serde` and `serde_json` dependencies
+* `Bench::with_samples` now wants `u32` rather than `usize`
+* Bench name lengths are now explicitly limited to 65,535
 
 
 

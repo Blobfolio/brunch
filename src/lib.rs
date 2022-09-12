@@ -220,4 +220,4 @@ pub(crate) use stats::{
 
 
 /// # Minimum Number of Samples.
-pub(crate) const MIN_SAMPLES: usize = 100;
+pub(crate) const MIN_SAMPLES: u32 = 100;
