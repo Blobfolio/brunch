@@ -16,19 +16,35 @@ use dactyl::{
 use std::{
 	cmp::Ordering,
 	collections::BTreeMap,
+	ffi::OsStr,
 	fs::File,
 	io::Write,
 	path::{
 		Path,
 		PathBuf,
 	},
+	sync::Once,
 	time::Duration,
 };
 
 
 
+/// # History Inner Data.
 type HistoryData = BTreeMap<String, Stats>;
+
+/// # History Default File Name.
+const HISTORY_FILE: &str = "__brunch.last";
+
+/// # History Magic Header.
+///
+/// This provides a quick way to know whether or not a given file might be a
+/// `Brunch` history. The trailing digits act like a format version; they'll
+/// get bumped any time the data format changes, to prevent compatibility
+/// issues between releases.
 const MAGIC: &[u8] = b"BRUNCH00";
+
+/// # Warn once about use of `BRUNCH_DIR` env.
+static BRUNCH_DIR_ENV: Once = Once::new();
 
 
 
@@ -42,7 +58,7 @@ pub(crate) struct History(HistoryData);
 
 impl Default for History {
 	fn default() -> Self {
-		load_history().unwrap_or_else(|| Self(BTreeMap::default()))
+		Self(load_history().unwrap_or_default())
 	}
 }
 
@@ -251,22 +267,51 @@ fn deserialize_entry(raw: &[u8]) -> Option<(&str, Stats, &[u8])> {
 ///
 /// Return the file path history should be written to or read from.
 fn history_path() -> Option<PathBuf> {
+	// No history?
 	if std::env::var("NO_BRUNCH_HISTORY").map_or(false, |s| s.trim() == "1") { None }
+	// To a specific file?
+	else if let Some(p) = std::env::var_os("BRUNCH_HISTORY") {
+		let p: &Path = p.as_ref();
+
+		// If the path exists, it cannot be a directory.
+		if p.is_dir() { return None; }
+
+		// Tease out the parent.
+		let parent = try_dir(p.parent())
+			.or_else(|| try_dir(std::env::current_dir().ok()))?;
+
+		// Tease out the file name.
+		let name = match p.file_name() {
+			Some(n) if ! n.is_empty() => n,
+			_ => OsStr::new(HISTORY_FILE),
+		};
+
+		Some(parent.join(name))
+	}
+	// To a specific directory?
+	else if let Some(p) = try_dir(std::env::var_os("BRUNCH_DIR")) {
+		// Fake a deprecation notice since we can't apply the real one to an
+		// env value.
+		BRUNCH_DIR_ENV.call_once(|| {
+			eprint!("\x1b[1;38;5;3mwarning\x1b[0;1m: use of deprecated env `BRUNCH_DIR`: use `BRUNCH_HISTORY` (with full file path, not directory) instead.\x1b[0m\n\n");
+		});
+
+		Some(p.join(HISTORY_FILE))
+	}
+	// To the default temporary location?
 	else {
-		let mut p = try_dir(std::env::var_os("BRUNCH_DIR"))
-			.or_else(|| try_dir(Some(std::env::temp_dir())))?;
-		p.push("__brunch.json");
-		Some(p)
+		let p = try_dir(Some(std::env::temp_dir()))?;
+		Some(p.join(HISTORY_FILE))
 	}
 }
 
 /// # Read History.
 ///
 /// Load and return the history, if any.
-fn load_history() -> Option<History> {
+fn load_history() -> Option<HistoryData> {
 	let file = history_path()?;
 	let raw = std::fs::read(file).ok()?;
-	Some(History(deserialize(&raw)))
+	Some(deserialize(&raw))
 }
 
 /// # Serialize.
@@ -275,8 +320,8 @@ fn load_history() -> Option<History> {
 /// a magic header, then each entry.
 ///
 /// Each entry starts with a u16 corresponding to the length of the bench name,
-/// which follows. After that, total (u32), valid (u32), deviation (f64), and
-/// mean (f64) appear.
+/// then the name itself. After that, 24 bytes corresponding to the total (u32),
+/// valid (u32), deviation (f64), and mean (f64) appear.
 ///
 /// All integers use Big Endian storage.
 fn serialize(history: &HistoryData) -> Vec<u8> {
@@ -285,8 +330,8 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 
 	// Write each section.
 	for (lbl, s) in history.iter() {
-		// We panic on long names so this won't hit, but better safe than
-		// sorry.
+		// We panic on long names so this should never fail, but just in case,
+		// let's check.
 		let len = match u16::try_from(lbl.len()) {
 			Ok(l) => l,
 			Err(_) => continue,
@@ -323,7 +368,16 @@ fn split_array<const S: usize>(raw: &[u8]) -> Option<([u8; S], &[u8])> {
 ///
 /// Test if the thing is a directory and return it.
 fn try_dir<P: AsRef<Path>>(dir: Option<P>) -> Option<PathBuf> {
-	let dir = std::fs::canonicalize(dir?).ok()?;
+	let dir = dir?;
+	let dir: &Path = dir.as_ref();
+
+	// Create the directory if it doesn't exist.
+	if ! dir.exists() { std::fs::create_dir_all(dir).ok()?; }
+
+	// Canonicalize it.
+	let dir = std::fs::canonicalize(dir).ok()?;
+
+	// Return it so long as it is a directory.
 	if dir.is_dir() { Some(dir) }
 	else { None }
 }

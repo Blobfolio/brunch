@@ -4,12 +4,20 @@
 
 ## [0.3.5](https://github.com/Blobfolio/brunch/releases/tag/v0.3.5) - TBD
 
+### New
+
+* `BRUNCH_HISTORY=/path/to/file` env
+
 ### Changed
 
 * Bump MSRV `1.63.0`
 * Drop `serde` and `serde_json` dependencies
 * `Bench::with_samples` now wants `u32` rather than `usize`
 * Bench name lengths are now explicitly limited to 65,535
+
+### Deprecated
+
+* `BRUNCH_DIR=/path/to/dir` env (use `BRUNCH_HISTORY` instead)
 
 
 
