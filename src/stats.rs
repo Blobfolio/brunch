@@ -231,10 +231,12 @@ fn deserialize(raw: &[u8]) -> HistoryData {
 /// # Deserialize Stat.
 ///
 /// This deserializes a single benchmark entry (a label and `Stats`), returning
-/// the pieces along with the remainder of the input slice if valid.
+/// those pieces along with the remainder of the input slice.
 ///
-/// This doesn't worry about key/value sanity, so will only abort if the
-/// lengths are wrong or the label cannot be stringified.
+/// This doesn't worry about the logical sanity of the key/value components —
+/// the main `deserialize` method handles that — but if the label cannot be
+/// stringified or the slice is too small for the expected data, `None` will be
+/// returned.
 fn deserialize_entry(raw: &[u8]) -> Option<(&str, Stats, &[u8])> {
 	const STAT_SIZE: usize = 4 + 4 + 8 + 8;
 
@@ -247,19 +249,23 @@ fn deserialize_entry(raw: &[u8]) -> Option<(&str, Stats, &[u8])> {
 	let (lbl, raw) = raw.split_at(len);
 	let lbl = std::str::from_utf8(lbl).ok()?.trim();
 
-	// Parse total, valid, deviation, and mean.
+	// Total.
 	let (total, raw) = split_array::<4>(raw)?;
 	let total = u32::from_be_bytes(total);
 
+	// Valid.
 	let (valid, raw) = split_array::<4>(raw)?;
 	let valid = u32::from_be_bytes(valid);
 
+	// Deviation.
 	let (deviation, raw) = split_array::<8>(raw)?;
 	let deviation = f64::from_be_bytes(deviation);
 
+	// Mean.
 	let (mean, raw) = split_array::<8>(raw)?;
 	let mean = f64::from_be_bytes(mean);
 
+	// Done!
 	Some((lbl, Stats { total, valid, deviation, mean }, raw))
 }
 
@@ -325,10 +331,11 @@ fn load_history() -> Option<HistoryData> {
 ///
 /// All integers use Big Endian storage.
 fn serialize(history: &HistoryData) -> Vec<u8> {
-	// Magic header.
-	let mut out = MAGIC.to_vec();
+	// Start with the magic header.
+	let mut out = Vec::with_capacity(64 * history.len());
+	out.extend_from_slice(MAGIC);
 
-	// Write each section.
+	// Write each benchmark entry.
 	for (lbl, s) in history.iter() {
 		// We panic on long names so this should never fail, but just in case,
 		// let's check.
@@ -337,11 +344,11 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 			Err(_) => continue,
 		};
 
-		// Write the label.
+		// Entries begin with the length of the label, then the label itself.
 		out.extend_from_slice(&len.to_be_bytes());
 		out.extend_from_slice(lbl.as_bytes());
 
-		// Write total, valid, deviation, and mean.
+		// Total, valid, deviation, and mean follow, in that order.
 		out.extend_from_slice(&s.total.to_be_bytes());
 		out.extend_from_slice(&s.valid.to_be_bytes());
 		out.extend_from_slice(&s.deviation.to_be_bytes());
@@ -353,8 +360,11 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 
 /// # Split Array.
 ///
-/// This takes the first `S` bytes and forms an array, then returns the rest
-/// as a slice.
+/// This splits a slice at S, converts the first half to `[u8; S]`, and returns
+/// the result.
+///
+/// This is similar to the nightly-only `slice::split_array_ref`, but won't
+/// panic, and the array portion is copied (owned).
 fn split_array<const S: usize>(raw: &[u8]) -> Option<([u8; S], &[u8])> {
 	if S <= raw.len() {
 		let (l, r) = raw.split_at(S);
@@ -412,10 +422,11 @@ mod tests {
 		];
 
 		// Our reference.
-		let h = ENTRIES.into_iter().map(|(k, v)| (k.to_owned(), v)).collect::<HistoryData>();
+		let mut h = ENTRIES.into_iter().map(|(k, v)| (k.to_owned(), v)).collect::<HistoryData>();
 
 		// Serialize it.
 		let s = serialize(&h);
+		assert!(s.starts_with(MAGIC), "Missing magic header.");
 
 		// Deserialize it.
 		let d = deserialize(&s);
@@ -431,6 +442,22 @@ mod tests {
 			assert!(total_cmp!((stat.deviation) == (tmp.deviation)), "Deviation changed.");
 			assert!(total_cmp!((stat.mean) == (tmp.mean)), "Mean changed.");
 		}
+
+		// Let's add a logically-suspect entry to the history, and make sure
+		// it gets stripped out during deserialize.
+		h.insert("A Suspect One".to_owned(), Stats {
+			total: 200,
+			valid: 300,
+			deviation: 0.000400123,
+			mean: 0.0000122,
+		});
+		assert!(h.get("A Suspect One").is_some());
+		let s = serialize(&h);
+		let d = deserialize(&s);
+
+		assert!(d.get("The First One").is_some());
+		assert!(d.get("The Second One").is_some());
+		assert!(d.get("A Suspect One").is_none()); // Shouldn't be here.
 	}
 
 	#[test]
