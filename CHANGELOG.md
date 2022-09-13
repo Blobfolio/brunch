@@ -2,7 +2,7 @@
 
 
 
-## [0.3.5](https://github.com/Blobfolio/brunch/releases/tag/v0.3.5) - TBD
+## [0.3.5](https://github.com/Blobfolio/brunch/releases/tag/v0.3.5) - 2022-09-12
 
 ### New
 
@@ -12,8 +12,8 @@
 
 * Bump MSRV `1.63.0`
 * Drop `serde` and `serde_json` dependencies
-* `Bench::with_samples` now wants `u32` rather than `usize`
-* Bench name lengths are now explicitly limited to 65,535
+* `Bench::with_samples` now requires `u32` rather than `usize`
+* Bench name lengths are now explicitly limited to `65,535`
 
 ### Deprecated
 
