@@ -5,7 +5,7 @@
 #[macro_export(local_inner_macros)]
 /// # Helper: Benchmarks
 ///
-/// The [`brunch::benches`] macro is the easiest way to run `Brunch` benchmarks.
+/// The [`benches`](crate::benches) macro is the easiest way to run `Brunch` benchmarks.
 ///
 /// Simply pass a comma-separated list of all the [`Bench`](crate::Bench)
 /// objects you want to run, and it will handle the setup, running, tabulation,

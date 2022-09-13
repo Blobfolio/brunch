@@ -9,7 +9,7 @@
 
 
 
-`Brunch` is a very simple Rust micro-benchmark runner inspired by [`easybench`](https://crates.io/crates/easybench). It has roughly a million times fewer dependencies than [`criterion`](https://crates.io/crates/criterion), does not require nightly, and maintains a "last run" state so can show relative changes benchmark-to-benchmark.
+`Brunch` is a very simple Rust micro-benchmark runner inspired by [`easybench`](https://crates.io/crates/easybench). It has roughly a million times fewer dependencies than [`criterion`](https://crates.io/crates/criterion), does not require nightly, and maintains a (single) "last run" state for each benchmark, allowing it to show relative changes from run-to-run.
 
 (The formatting is also quite pretty.)
 
@@ -78,8 +78,10 @@ harness = false
 
 The following optional environmental variables are supported:
 
-* `NO_BRUNCH_HISTORY=1`: don't save or load run-to-run history data;
-* `BRUNCH_DIR=/some/directory`: save run-to-run history data to this folder instead of `std::env::temp_dir`;
+| Variable | Value | Description | Default |
+| -------- | ----- | ----------- | ------- |
+| `NO_BRUNCH_HISTORY` | `1` | Disable run-to-run history. | |
+| `BRUNCH_HISTORY` | Path to history file. | Load/save run-to-run history from this specific path. | `std::env::temp_dir()/__brunch.last` |
 
 
 

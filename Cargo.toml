@@ -1,13 +1,14 @@
 [package]
 name = "brunch"
-version = "0.3.4"
+version = "0.3.5"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
-rust-version = "1.61"
+rust-version = "1.63"
 description = "A simple micro-benchmark runner."
 license = "WTFPL"
 repository = "https://github.com/Blobfolio/brunch"
 readme = "README.md"
+keywords = [ "benchmark", "profiling" ]
 exclude = [
 	".github",
 	".gitignore",
@@ -28,8 +29,6 @@ credits-dir = "./"
 
 [dependencies]
 dactyl = "0.4.*, >=0.4.5"
-serde = "1.0.*"
-serde_json = "1.0.*"
 unicode-width = "0.1.*"
 
 [dev-dependencies]
