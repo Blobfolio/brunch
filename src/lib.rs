@@ -218,7 +218,7 @@ pub use bench::{
 pub use error::BrunchError;
 pub(crate) use math::Abacus;
 pub(crate) use stats::{
-	History,
+	history::History,
 	Stats,
 };
 

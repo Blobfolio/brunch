@@ -1,20 +1,9 @@
 /*!
-# Brunch: Stats
+# Brunch: History
 */
 
-use crate::{
-	Abacus,
-	BrunchError,
-	MIN_SAMPLES,
-};
-use dactyl::{
-	NiceFloat,
-	NicePercent,
-	total_cmp,
-	traits::SaturatingFrom,
-};
+use crate::Stats;
 use std::{
-	cmp::Ordering,
 	collections::BTreeMap,
 	ffi::OsStr,
 	fs::File,
@@ -24,7 +13,6 @@ use std::{
 		PathBuf,
 	},
 	sync::Once,
-	time::Duration,
 };
 
 
@@ -79,117 +67,6 @@ impl History {
 			let out = serialize(&self.0);
 			let _res = f.write_all(&out).and_then(|_| f.flush());
 		}
-	}
-}
-
-
-
-#[derive(Debug, Clone, Copy)]
-/// # Runtime Stats!
-pub(crate) struct Stats {
-	/// # Total Samples.
-	total: u32,
-
-	/// # Valid Samples.
-	valid: u32,
-
-	/// # Standard Deviation.
-	deviation: f64,
-
-	/// # Mean Duration of Valid Samples.
-	mean: f64,
-}
-
-impl TryFrom<Vec<Duration>> for Stats {
-	type Error = BrunchError;
-	fn try_from(samples: Vec<Duration>) -> Result<Self, Self::Error> {
-		let total = u32::saturating_from(samples.len());
-		if total < MIN_SAMPLES {
-			return Err(BrunchError::TooSmall(total));
-		}
-
-		// Crunch!
-		let mut calc = Abacus::from(samples);
-		calc.prune_outliers();
-
-		let valid = u32::saturating_from(calc.len());
-		if valid < MIN_SAMPLES {
-			return Err(BrunchError::TooWild);
-		}
-
-		let mean = calc.mean();
-		let deviation = calc.deviation();
-
-		// Done!
-		let out = Self { total, valid, deviation, mean };
-		if out.is_valid() { Ok(out) }
-		else { Err(BrunchError::Overflow) }
-	}
-}
-
-impl Stats {
-	/// # Deviation?
-	///
-	/// This method is used to compare a past run with this (present) run to
-	/// see if it deviates in a meaningful way.
-	///
-	/// In practice, that means the absolute difference is greater than one
-	/// percent, and the old mean falls outside this run's valid range.
-	pub(crate) fn is_deviant(self, other: Self) -> Option<String> {
-		let lo = self.deviation.mul_add(-2.0, self.mean);
-		let hi = self.deviation.mul_add(2.0, self.mean);
-		if total_cmp!((other.mean) < lo) || total_cmp!((other.mean) > hi) {
-			let (color, sign, diff) = match self.mean.total_cmp(&other.mean) {
-				Ordering::Less => (92, "-", other.mean - self.mean),
-				Ordering::Equal => return None,
-				Ordering::Greater => (91, "+", self.mean - other.mean),
-			};
-
-			return Some(format!(
-				"\x1b[{}m{}{}\x1b[0m",
-				color,
-				sign,
-				NicePercent::from(diff / other.mean),
-			));
-		}
-
-		None
-	}
-
-	/// # Nice Mean.
-	///
-	/// Return the mean rescaled to the most appropriate unit.
-	pub(crate) fn nice_mean(self) -> String {
-		let (mean, unit) =
-			if total_cmp!((self.mean) < 0.000_001) {
-				(self.mean * 1_000_000_000.0, "ns")
-			}
-			else if total_cmp!((self.mean) < 0.001) {
-				(self.mean * 1_000_000.0, "\u{3bc}s")
-			}
-			else if total_cmp!((self.mean) < 1.0) {
-				(self.mean * 1_000.0, "ms")
-			}
-			else {
-				(self.mean, "s ")
-			};
-
-		format!("\x1b[0;1m{} {}\x1b[0m", NiceFloat::from(mean).precise_str(2), unit)
-	}
-
-	/// # Samples.
-	///
-	/// Return the valid/total samples.
-	pub(crate) const fn samples(self) -> (u32, u32) { (self.valid, self.total) }
-
-	/// # Is Valid?
-	fn is_valid(self) -> bool {
-		MIN_SAMPLES <= self.valid &&
-		self.valid <= self.total &&
-		self.deviation.is_finite() &&
-		total_cmp!((self.deviation) >= 0.0) &&
-		self.mean.is_finite() &&
-		total_cmp!((self.mean) >= 0.0)
 	}
 }
 
@@ -317,7 +194,8 @@ fn history_path() -> Option<PathBuf> {
 fn load_history() -> Option<HistoryData> {
 	let file = history_path()?;
 	let raw = std::fs::read(file).ok()?;
-	Some(deserialize(&raw))
+	let out = deserialize(&raw);
+	Some(out)
 }
 
 /// # Serialize.
@@ -358,6 +236,7 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 	out
 }
 
+#[allow(unsafe_code)]
 /// # Split Array.
 ///
 /// This splits a slice at S, converts the first half to `[u8; S]`, and returns
@@ -367,9 +246,10 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 /// panic, and the array portion is copied (owned).
 fn split_array<const S: usize>(raw: &[u8]) -> Option<([u8; S], &[u8])> {
 	if S <= raw.len() {
-		let (l, r) = raw.split_at(S);
-		let l: [u8; S] = l.try_into().ok()?;
-		Some((l, r))
+		let (a, b) = raw.split_at(S);
+		// Safety: We know the left side contains exactly S chunks.
+		let a: [u8; S] = unsafe { *(a.as_ptr().cast::<[u8; S]>()) };
+		Some((a, b))
 	}
 	else { None }
 }
@@ -397,9 +277,10 @@ fn try_dir<P: AsRef<Path>>(dir: Option<P>) -> Option<PathBuf> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use dactyl::total_cmp;
 
 	#[test]
-	fn t_stats_ser() {
+	fn t_serialize() {
 		const ENTRIES: [(&str, Stats); 2] = [
 			(
 				"The First One",
@@ -458,42 +339,5 @@ mod tests {
 		assert!(d.get("The First One").is_some());
 		assert!(d.get("The Second One").is_some());
 		assert!(d.get("A Suspect One").is_none()); // Shouldn't be here.
-	}
-
-	#[test]
-	fn t_stats_valid() {
-		let mut stat = Stats {
-			total: 2500,
-			valid: 2496,
-			deviation: 0.000000123,
-			mean: 0.0000022,
-		};
-
-		assert!(stat.is_valid(), "Stat should be valid.");
-
-		stat.total = 100;
-		assert!(! stat.is_valid(), "Insufficient total.");
-
-		stat.valid = 100;
-		assert!(stat.is_valid(), "Stat should be valid.");
-
-		stat.valid = 30;
-		assert!(! stat.is_valid(), "Insufficient samples.");
-
-		stat.valid = 100;
-		assert!(stat.is_valid(), "Stat should be valid.");
-
-		stat.deviation = f64::NAN;
-		assert!(! stat.is_valid(), "NaN deviation.");
-		stat.deviation = -0.003;
-		assert!(! stat.is_valid(), "Negative deviation.");
-
-		stat.deviation = 0.003;
-		assert!(stat.is_valid(), "Stat should be valid.");
-
-		stat.mean = f64::NAN;
-		assert!(! stat.is_valid(), "NaN mean.");
-		stat.mean = -0.003;
-		assert!(! stat.is_valid(), "Negative mean.");
 	}
 }
