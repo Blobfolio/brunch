@@ -72,78 +72,80 @@ impl History {
 
 
 
+/// # Deserialization.
+trait Deserialize<'a>: Sized {
+	/// # Deserialize.
+	///
+	/// This deserializes `Self` from some number of leading bytes, returning
+	/// it along with the rest of the slice.
+	fn deserialize(raw: &'a [u8]) -> Option<(Self, &'a [u8])>;
+}
+
+macro_rules! deserialize {
+	($($size:literal $ty:ty),+) => ($(
+		impl Deserialize<'_> for $ty {
+			fn deserialize(raw: &[u8]) -> Option<(Self, &[u8])> {
+				let (bytes, raw) = split_array::<$size>(raw)?;
+				Some((Self::from_be_bytes(bytes), raw))
+			}
+		}
+	)+);
+}
+
+deserialize!(2 u16, 4 u32, 8 f64);
+
+impl<'a> Deserialize<'a> for &'a str {
+	fn deserialize(raw: &'a [u8]) -> Option<(Self, &'a [u8])> {
+		let (len, raw) = u16::deserialize(raw)?;
+		let len = usize::from(len);
+		if raw.len() < len { None }
+		else {
+			let (lbl, raw) = raw.split_at(len);
+			let lbl = std::str::from_utf8(lbl).ok()?.trim();
+			Some((lbl, raw))
+		}
+	}
+}
+
+impl Deserialize<'_> for Stats {
+	fn deserialize(raw: &[u8]) -> Option<(Self, &[u8])> {
+		let (total, raw) = u32::deserialize(raw)?;
+		let (valid, raw) = u32::deserialize(raw)?;
+		let (deviation, raw) = f64::deserialize(raw)?;
+		let (mean, raw) = f64::deserialize(raw)?;
+
+		let out = Self { total, valid, deviation, mean };
+		Some((out, raw))
+	}
+}
+
+
+
 /// # Deserialize.
 ///
-/// This deserializes the inner data for a `History` object from our custom
-/// format. See `serialize` for more details.
+/// This deserializes the stored history data, if any. This will happily return
+/// an empty map if no benchmarks are present, but will return `None` if there
+/// are any structural issues, like a magic mismatch or invalid chunk lengths.
 ///
-/// This won't fail, but will strip out invalid entries as it comes across
-/// them.
-///
-/// Any time we change the version portion of our `MAGIC` constant, results
-/// from older versions will refuse to parse, resulting in an empty set.
-fn deserialize(raw: &[u8]) -> HistoryData {
+/// See `serialize` for more details about the format.
+fn deserialize(raw: &[u8]) -> Option<HistoryData> {
+	let mut raw = raw.strip_prefix(MAGIC)?;
 	let mut out = HistoryData::default();
 
-	// It should start with our magic header.
-	let mut raw = match raw.strip_prefix(MAGIC) {
-		Some(r) => r,
-		None => return out,
-	};
+	while ! raw.is_empty() {
+		let (lbl, rest) = <&str>::deserialize(raw)?;
+		let (stats, rest) = Stats::deserialize(rest)?;
 
-	while let Some((lbl, stats, rem)) = deserialize_entry(raw) {
-		// Keep it?
+		// Push the result if it's valid.
 		if ! lbl.is_empty() && stats.is_valid() {
 			out.insert(lbl.to_owned(), stats);
 		}
 
-		// Are we done?
-		if rem.is_empty() { break; }
-		raw = rem;
+		// Update the slice for the next go-round.
+		raw = rest;
 	}
 
-	out
-}
-
-/// # Deserialize Stat.
-///
-/// This deserializes a single benchmark entry (a label and `Stats`), returning
-/// those pieces along with the remainder of the input slice.
-///
-/// This doesn't worry about the logical sanity of the key/value components —
-/// the main `deserialize` method handles that — but if the label cannot be
-/// stringified or the slice is too small for the expected data, `None` will be
-/// returned.
-fn deserialize_entry(raw: &[u8]) -> Option<(&str, Stats, &[u8])> {
-	const STAT_SIZE: usize = 4 + 4 + 8 + 8;
-
-	// Find the length of the label.
-	let (len, raw) = split_array::<2>(raw)?;
-	let len = u16::from_be_bytes(len) as usize;
-	if raw.len() < len + STAT_SIZE { return None; }
-
-	// Parse the label.
-	let (lbl, raw) = raw.split_at(len);
-	let lbl = std::str::from_utf8(lbl).ok()?.trim();
-
-	// Total.
-	let (total, raw) = split_array::<4>(raw)?;
-	let total = u32::from_be_bytes(total);
-
-	// Valid.
-	let (valid, raw) = split_array::<4>(raw)?;
-	let valid = u32::from_be_bytes(valid);
-
-	// Deviation.
-	let (deviation, raw) = split_array::<8>(raw)?;
-	let deviation = f64::from_be_bytes(deviation);
-
-	// Mean.
-	let (mean, raw) = split_array::<8>(raw)?;
-	let mean = f64::from_be_bytes(mean);
-
-	// Done!
-	Some((lbl, Stats { total, valid, deviation, mean }, raw))
+	Some(out)
 }
 
 /// # History Path.
@@ -194,20 +196,29 @@ fn history_path() -> Option<PathBuf> {
 fn load_history() -> Option<HistoryData> {
 	let file = history_path()?;
 	let raw = std::fs::read(file).ok()?;
-	let out = deserialize(&raw);
-	Some(out)
+	deserialize(&raw)
 }
 
 /// # Serialize.
 ///
-/// This is a cheap, custom serialization structure for history. It begins with
-/// a magic header, then each entry.
+/// This cheaply serializes the run-to-run history data to a simple, compact
+/// binary structure, more or less placing all the fields back-to-back.
 ///
-/// Each entry starts with a u16 corresponding to the length of the bench name,
-/// then the name itself. After that, 24 bytes corresponding to the total (u32),
-/// valid (u32), deviation (f64), and mean (f64) appear.
+/// The output begins with an 8-byte ASCII string, comprising `BRUNCH` and a
+/// format version (in case we ever need to alter the structure).
 ///
-/// All integers use Big Endian storage.
+/// After that, zero or more entries follow, each with the following format:
+///
+/// | Length | Format | Data |
+/// | ------ | ------ | ---- |
+/// | 2 | `u16` | Length of bench label. |
+/// | _n_ | UTF-8 | Bench label. |
+/// | 4 | `u32` | Total samples. |
+/// | 4 | `u32` | Valid samples. |
+/// | 8 | `f64` | Standard deviation. |
+/// | 8 | `f64` | Average time. |
+///
+/// All number sequences use the Big Endian layout.
 fn serialize(history: &HistoryData) -> Vec<u8> {
 	// Start with the magic header.
 	let mut out = Vec::with_capacity(64 * history.len());
@@ -239,17 +250,16 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 #[allow(unsafe_code)]
 /// # Split Array.
 ///
-/// This splits a slice at S, converts the first half to `[u8; S]`, and returns
-/// the result.
-///
-/// This is similar to the nightly-only `slice::split_array_ref`, but won't
-/// panic, and the array portion is copied (owned).
+/// This is basically a rewrite of the nightly-only `slice::split_array_ref`
+/// method, except instead of panicking it will return `None` if the length too
+/// small to split.
 fn split_array<const S: usize>(raw: &[u8]) -> Option<([u8; S], &[u8])> {
 	if S <= raw.len() {
-		let (a, b) = raw.split_at(S);
-		// Safety: We know the left side contains exactly S chunks.
-		let a: [u8; S] = unsafe { *(a.as_ptr().cast::<[u8; S]>()) };
-		Some((a, b))
+		// Safety: we know there are at least S bytes.
+		Some(unsafe {(
+			*(raw.get_unchecked(..S).as_ptr().cast()),
+			raw.get_unchecked(S..),
+		)})
 	}
 	else { None }
 }
@@ -310,10 +320,10 @@ mod tests {
 		assert!(s.starts_with(MAGIC), "Missing magic header.");
 
 		// Deserialize it.
-		let d = deserialize(&s);
+		let d = deserialize(&s).expect("Deserialization failed.");
 
 		// The deserialized length should match our reference length.
-		assert_eq!(h.len(), d.len());
+		assert_eq!(h.len(), d.len(), "Deserialized length mismatch.");
 
 		// Make sure the entries are unchanged.
 		for (lbl, stat) in ENTRIES {
@@ -332,12 +342,39 @@ mod tests {
 			deviation: 0.000400123,
 			mean: 0.0000122,
 		});
-		assert!(h.get("A Suspect One").is_some());
-		let s = serialize(&h);
-		let d = deserialize(&s);
+		h.insert(String::new(), Stats {
+			total: 500,
+			valid: 300,
+			deviation: 0.000400123,
+			mean: 0.0000122,
+		});
 
-		assert!(d.get("The First One").is_some());
-		assert!(d.get("The Second One").is_some());
+		// Make sure these exist in the reference struct.
+		assert!(h.get("A Suspect One").is_some());
+		assert!(h.get("").is_some());
+
+		// Another round of in/out.
+		let mut s = serialize(&h);
+		let d = deserialize(&s).expect("Deserialization failed.");
+
+		// Check they got filtered out during deserialization.
+		assert_eq!(ENTRIES.len(), d.len(), "Deserialized length mismatch.");
 		assert!(d.get("A Suspect One").is_none()); // Shouldn't be here.
+		assert!(d.get("").is_none());
+
+		// To be extra safe, let's recheck the valid entries to make sure they
+		// didn't get screwed up in any way.
+		for (lbl, stat) in ENTRIES {
+			let tmp = d.get(lbl).expect("Missing entry!");
+			assert_eq!(stat.total, tmp.total, "Total changed.");
+			assert_eq!(stat.valid, tmp.valid, "Valid changed.");
+			assert!(total_cmp!((stat.deviation) == (tmp.deviation)), "Deviation changed.");
+			assert!(total_cmp!((stat.mean) == (tmp.mean)), "Mean changed.");
+		}
+
+		// Make sure deserializing doesn't do anything on bad data.
+		s.pop().unwrap();
+		assert!(deserialize(&s).is_none());
+		assert!(deserialize(&[]).is_none());
 	}
 }
