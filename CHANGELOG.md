@@ -2,6 +2,15 @@
 
 
 
+## [0.3.6](https://github.com/Blobfolio/brunch/releases/tag/v0.3.6) - 2022-09-22
+
+### Changed
+
+* Improved docs
+* Miscellaneous code cleanup
+
+
+
 ## [0.3.5](https://github.com/Blobfolio/brunch/releases/tag/v0.3.5) - 2022-09-12
 
 ### New
