@@ -148,6 +148,7 @@ fn deserialize(raw: &[u8]) -> Option<HistoryData> {
 	Some(out)
 }
 
+#[allow(clippy::option_if_let_else)]
 /// # History Path.
 ///
 /// Return the file path history should be written to or read from.
