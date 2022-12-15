@@ -6,8 +6,10 @@ use unicode_width::UnicodeWidthChar;
 
 
 
+#[cfg(not(no_brunch_black_box))]
 #[allow(unsafe_code)]
 #[doc(hidden)]
+#[deprecated(since = "0.3.7", note = "update to Rust 1.66, which stabilized black_box.")]
 /// # Black Box.
 ///
 /// This pseudo-black box is stolen from [`easybench`](https://crates.io/crates/easybench), which
