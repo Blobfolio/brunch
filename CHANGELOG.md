@@ -2,6 +2,18 @@
 
 
 
+## [0.3.7](https://github.com/Blobfolio/brunch/releases/tag/v0.3.7) - 2022-12-14
+
+### Changed
+
+* Prefer newly stabilized `std::hint::black_box`
+
+### Deprecated
+
+* `black_box` fallback (for Rust <= `1.65`)
+
+
+
 ## [0.3.6](https://github.com/Blobfolio/brunch/releases/tag/v0.3.6) - 2022-09-22
 
 ### Changed

@@ -22,6 +22,12 @@ use std::{
 	},
 };
 
+#[cfg(no_brunch_black_box)]
+use std::hint::black_box;
+
+#[cfg(not(no_brunch_black_box))]
+use crate::util::black_box;
+
 
 
 #[allow(unsafe_code)]
@@ -396,7 +402,7 @@ impl Bench {
 
 		for _ in 0..self.samples.get() {
 			let now2 = Instant::now();
-			let _res = util::black_box(cb());
+			let _res = black_box(cb());
 			times.push(now2.elapsed());
 
 			if self.timeout <= now.elapsed() { break; }
@@ -437,7 +443,7 @@ impl Bench {
 		for _ in 0..self.samples.get() {
 			let seed2 = seed.clone();
 			let now2 = Instant::now();
-			let _res = util::black_box(cb(seed2));
+			let _res = black_box(cb(seed2));
 			times.push(now2.elapsed());
 
 			if self.timeout <= now.elapsed() { break; }
@@ -479,7 +485,7 @@ impl Bench {
 		for _ in 0..self.samples.get() {
 			let seed2 = seed();
 			let now2 = Instant::now();
-			let _res = util::black_box(cb(seed2));
+			let _res = black_box(cb(seed2));
 			times.push(now2.elapsed());
 
 			if self.timeout <= now.elapsed() { break; }
