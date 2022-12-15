@@ -2,7 +2,7 @@
 
 
 
-## [0.3.7](https://github.com/Blobfolio/brunch/releases/tag/v0.3.7) - 2022-12-14
+## [0.3.7](https://github.com/Blobfolio/brunch/releases/tag/v0.3.7) - 2022-12-15
 
 ### Changed
 
