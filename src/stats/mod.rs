@@ -112,7 +112,7 @@ impl Stats {
 				(self.mean, "s ")
 			};
 
-		format!("\x1b[0;1m{} {}\x1b[0m", NiceFloat::from(mean).precise_str(2), unit)
+		format!("\x1b[0;1m{} {unit}\x1b[0m", NiceFloat::from(mean).precise_str(2))
 	}
 
 	/// # Samples.

@@ -168,7 +168,7 @@ impl Benches {
 		// Update the history.
 		self.finish_history(&mut history);
 
-		eprintln!("{}", summary);
+		eprintln!("{summary}");
 	}
 
 	/// # Finish: Update History.
