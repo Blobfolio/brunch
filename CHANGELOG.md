@@ -2,6 +2,19 @@
 
 
 
+## [0.3.8](https://github.com/Blobfolio/brunch/releases/tag/v0.3.8) - TBD
+
+### Changed
+
+* Bump MSRV `1.66`
+* Fix ci badge syntax (docs)
+
+### Removed
+
+* Remove `black_box` fallback and related build dependency
+
+
+
 ## [0.3.7](https://github.com/Blobfolio/brunch/releases/tag/v0.3.7) - 2022-12-15
 
 ### Changed
