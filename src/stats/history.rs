@@ -12,7 +12,6 @@ use std::{
 		Path,
 		PathBuf,
 	},
-	sync::Once,
 };
 
 
@@ -30,9 +29,6 @@ const HISTORY_FILE: &str = "__brunch.last";
 /// get bumped any time the data format changes, to prevent compatibility
 /// issues between releases.
 const MAGIC: &[u8] = b"BRUNCH00";
-
-/// # Warn once about use of `BRUNCH_DIR` env.
-static BRUNCH_DIR_ENV: Once = Once::new();
 
 
 
@@ -173,16 +169,6 @@ fn history_path() -> Option<PathBuf> {
 		};
 
 		Some(parent.join(name))
-	}
-	// To a specific directory?
-	else if let Some(p) = try_dir(std::env::var_os("BRUNCH_DIR")) {
-		// Fake a deprecation notice since we can't apply the real one to an
-		// env value.
-		BRUNCH_DIR_ENV.call_once(|| {
-			eprint!("\x1b[1;38;5;3mwarning\x1b[0;1m: use of deprecated env `BRUNCH_DIR`: use `BRUNCH_HISTORY` (with full file path, not directory) instead.\x1b[0m\n\n");
-		});
-
-		Some(p.join(HISTORY_FILE))
 	}
 	// To the default temporary location?
 	else {

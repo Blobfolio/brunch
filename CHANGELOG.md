@@ -2,7 +2,7 @@
 
 
 
-## [0.3.8](https://github.com/Blobfolio/brunch/releases/tag/v0.3.8) - TBD
+## [0.4.0](https://github.com/Blobfolio/brunch/releases/tag/v0.4.0) - TBD
 
 ### Changed
 
@@ -12,6 +12,7 @@
 ### Removed
 
 * Remove `black_box` fallback and related build dependency
+* Remove `BRUNCH_DIR` environmental variable
 
 
 
