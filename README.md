@@ -3,7 +3,7 @@
 [![docs.rs](https://img.shields.io/docsrs/brunch.svg?style=flat-square&label=docs.rs)](https://docs.rs/brunch/)
 [![changelog](https://img.shields.io/crates/v/brunch.svg?style=flat-square&label=changelog&color=9b59b6)](https://github.com/Blobfolio/brunch/blob/master/CHANGELOG.md)<br>
 [![crates.io](https://img.shields.io/crates/v/brunch.svg?style=flat-square&label=crates.io)](https://crates.io/crates/brunch)
-[![ci](https://img.shields.io/github/workflow/status/Blobfolio/brunch/Build.svg?style=flat-square&label=ci)](https://github.com/Blobfolio/brunch/actions)
+[![ci](https://img.shields.io/github/actions/workflow/status/Blobfolio/brunch/ci.yaml?style=flat-square&label=ci)](https://github.com/Blobfolio/brunch/actions)
 [![deps.rs](https://deps.rs/repo/github/blobfolio/brunch/status.svg?style=flat-square&label=deps.rs)](https://deps.rs/repo/github/blobfolio/brunch)<br>
 [![license](https://img.shields.io/badge/license-wtfpl-ff1493?style=flat-square)](https://en.wikipedia.org/wiki/WTFPL)
 [![contributions welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&label=contributions)](https://github.com/Blobfolio/brunch/issues)
@@ -66,7 +66,7 @@ Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
 
 ```yaml
 [dev-dependencies]
-brunch = "0.3.*"
+brunch = "0.4.*"
 ```
 
 Benchmarks should also be defined in `Cargo.toml`. Just be sure to set `harness = false` for each:
@@ -183,7 +183,7 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 
 See also: [CREDITS.md](CREDITS.md)
 
-Copyright © 2022 [Blobfolio, LLC](https://blobfolio.com) &lt;hello@blobfolio.com&gt;
+Copyright © 2023 [Blobfolio, LLC](https://blobfolio.com) &lt;hello@blobfolio.com&gt;
 
 This work is free. You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2.
 

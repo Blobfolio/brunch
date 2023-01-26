@@ -15,18 +15,13 @@ use dactyl::{
 };
 use std::{
 	fmt,
+	hint::black_box,
 	num::NonZeroU32,
 	time::{
 		Duration,
 		Instant,
 	},
 };
-
-#[cfg(no_brunch_black_box)]
-use std::hint::black_box;
-
-#[cfg(not(no_brunch_black_box))]
-use crate::util::black_box;
 
 
 
