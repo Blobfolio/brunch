@@ -215,20 +215,17 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 	for (lbl, s) in history.iter() {
 		// We panic on long names so this should never fail, but just in case,
 		// let's check.
-		let len = match u16::try_from(lbl.len()) {
-			Ok(l) => l,
-			Err(_) => continue,
-		};
+		if let Ok(len) = u16::try_from(lbl.len()) {
+			// Entries begin with the length of the label, then the label itself.
+			out.extend_from_slice(&len.to_be_bytes());
+			out.extend_from_slice(lbl.as_bytes());
 
-		// Entries begin with the length of the label, then the label itself.
-		out.extend_from_slice(&len.to_be_bytes());
-		out.extend_from_slice(lbl.as_bytes());
-
-		// Total, valid, deviation, and mean follow, in that order.
-		out.extend_from_slice(&s.total.to_be_bytes());
-		out.extend_from_slice(&s.valid.to_be_bytes());
-		out.extend_from_slice(&s.deviation.to_be_bytes());
-		out.extend_from_slice(&s.mean.to_be_bytes());
+			// Total, valid, deviation, and mean follow, in that order.
+			out.extend_from_slice(&s.total.to_be_bytes());
+			out.extend_from_slice(&s.valid.to_be_bytes());
+			out.extend_from_slice(&s.deviation.to_be_bytes());
+			out.extend_from_slice(&s.mean.to_be_bytes());
+		}
 	}
 
 	out
