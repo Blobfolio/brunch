@@ -66,7 +66,7 @@ Add `brunch` to your `dev-dependencies` in `Cargo.toml`, like:
 
 ```yaml
 [dev-dependencies]
-brunch = "0.3.*"
+brunch = "0.4.*"
 ```
 
 Benchmarks should also be defined in `Cargo.toml`. Just be sure to set `harness = false` for each:
