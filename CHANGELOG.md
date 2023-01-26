@@ -2,7 +2,7 @@
 
 
 
-## [0.4.0](https://github.com/Blobfolio/brunch/releases/tag/v0.4.0) - TBD
+## [0.4.0](https://github.com/Blobfolio/brunch/releases/tag/v0.4.0) - 2023-01-26
 
 ### Changed
 
