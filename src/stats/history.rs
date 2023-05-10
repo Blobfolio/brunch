@@ -235,8 +235,8 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 /// # Split Array.
 ///
 /// This is basically a rewrite of the nightly-only `slice::split_array_ref`
-/// method, except instead of panicking it will return `None` if the length too
-/// small to split.
+/// method, except instead of panicking it will return `None` if the length is
+/// too small to split.
 fn split_array<const S: usize>(raw: &[u8]) -> Option<([u8; S], &[u8])> {
 	if S <= raw.len() {
 		// Safety: we know there are at least S bytes.
