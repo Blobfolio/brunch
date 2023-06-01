@@ -2,6 +2,16 @@
 
 
 
+## [0.5.0](https://github.com/Blobfolio/brunch/releases/tag/v0.5.0) - 2023-06-01
+
+### Changed
+
+* Bump MSRV `1.70`
+* CI: test in debug and release modes
+* CI: verify MSRV
+
+
+
 ## [0.4.0](https://github.com/Blobfolio/brunch/releases/tag/v0.4.0) - 2023-01-26
 
 ### Changed
