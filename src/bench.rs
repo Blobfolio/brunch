@@ -694,22 +694,22 @@ fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
 
 	if pos == 0 {
 		"\x1b[94m".chars()
-			.chain(name.into_iter())
+			.chain(name)
 			.chain("\x1b[0m".chars())
 			.collect()
 	}
 	else if pos == len {
 		"\x1b[34m".chars()
-			.chain(name.into_iter())
+			.chain(name)
 			.chain("\x1b[0m".chars())
 			.collect()
 	}
 	else {
 		let b = name.split_off(pos);
 		"\x1b[34m".chars()
-			.chain(name.into_iter())
+			.chain(name)
 			.chain("\x1b[94m".chars())
-			.chain(b.into_iter())
+			.chain(b)
 			.chain("\x1b[0m".chars())
 			.collect()
 	}
