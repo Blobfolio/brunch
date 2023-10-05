@@ -61,7 +61,7 @@ impl History {
 	pub(crate) fn save(&self) {
 		if let Some(mut f) = history_path().and_then(|f| File::create(f).ok()) {
 			let out = serialize(&self.0);
-			let _res = f.write_all(&out).and_then(|_| f.flush());
+			let _res = f.write_all(&out).and_then(|()| f.flush());
 		}
 	}
 }
@@ -212,7 +212,7 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 	out.extend_from_slice(MAGIC);
 
 	// Write each benchmark entry.
-	for (lbl, s) in history.iter() {
+	for (lbl, s) in history {
 		// We panic on long names so this should never fail, but just in case,
 		// let's check.
 		if let Ok(len) = u16::try_from(lbl.len()) {
