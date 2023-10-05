@@ -2,6 +2,14 @@
 
 
 
+## [0.5.1](https://github.com/Blobfolio/brunch/releases/tag/v0.5.1) - 2023-10-05
+
+### Changed
+
+* Minor code lints and cleanup
+
+
+
 ## [0.5.0](https://github.com/Blobfolio/brunch/releases/tag/v0.5.0) - 2023-06-01
 
 ### Changed
