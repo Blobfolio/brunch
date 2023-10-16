@@ -2,7 +2,10 @@
 # Brunch: Math
 */
 
-use dactyl::total_cmp;
+use dactyl::{
+	total_cmp,
+	traits::IntDivFloat,
+};
 use std::{
 	cmp::Ordering,
 	time::Duration,
@@ -307,7 +310,7 @@ fn quantile_diff(below: usize, above: usize, ref_below: usize, ref_above: usize)
 	let below = below.abs_diff(ref_below);
 	let above = above.abs_diff(ref_above);
 
-	dactyl::int_div_float(below + above, 2).unwrap_or_default()
+	(below + above).div_float(2).unwrap_or_default()
 }
 
 

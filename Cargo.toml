@@ -28,7 +28,7 @@ man-dir = "./"
 credits-dir = "./"
 
 [dependencies]
-dactyl = "0.5.*"
+dactyl = "0.6.*"
 unicode-width = "0.1.*"
 
 [dev-dependencies]
