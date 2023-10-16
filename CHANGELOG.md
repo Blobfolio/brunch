@@ -2,6 +2,14 @@
 
 
 
+## [0.5.2](https://github.com/Blobfolio/brunch/releases/tag/v0.5.2) - 2023-10-15
+
+### Changed
+
+* Bump `dactyl` to `0.6`
+
+
+
 ## [0.5.1](https://github.com/Blobfolio/brunch/releases/tag/v0.5.1) - 2023-10-05
 
 ### Changed
