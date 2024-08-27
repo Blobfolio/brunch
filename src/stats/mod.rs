@@ -142,8 +142,8 @@ mod tests {
 		let mut stat = Stats {
 			total: 2500,
 			valid: 2496,
-			deviation: 0.000000123,
-			mean: 0.0000022,
+			deviation: 0.000_000_123,
+			mean: 0.000_002_2,
 		};
 
 		assert!(stat.is_valid(), "Stat should be valid.");

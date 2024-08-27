@@ -22,9 +22,16 @@ use std::{
 ///
 /// (This is basically where the stats from `Stats` come from.)
 pub(crate) struct Abacus {
+	/// # All the Numbers.
 	set: Vec<f64>,
+
+	/// # Set Length.
 	len: usize,
+
+	/// # Number of Unique Entries.
 	unique: usize,
+
+	/// # Sum of Set.
 	total: f64,
 }
 
@@ -68,7 +75,7 @@ impl Abacus {
 	/// # Length.
 	pub(crate) const fn len(&self) -> usize { self.len }
 
-	#[allow(clippy::cast_precision_loss)]
+	#[allow(clippy::cast_precision_loss)] // It is what it is.
 	/// # Float Length.
 	const fn f_len(&self) -> f64 { self.len as f64 }
 }
@@ -157,7 +164,8 @@ impl Abacus {
 			.count()
 	}
 
-	#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+	#[allow(clippy::cast_possible_truncation)] // False positive.
+	#[allow(clippy::cast_sign_loss)]           // False positive.
 	/// # Quantile.
 	///
 	/// Return the quantile at the corresponding percentage. Values are clamped
@@ -336,6 +344,7 @@ mod tests {
 	}
 
 	#[test]
+	#[allow(clippy::float_cmp)] // It is what it is.
 	/// # Compare Metrics.
 	///
 	/// This uses the third-party `Quantogram` struct to sanity-check the

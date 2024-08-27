@@ -172,35 +172,57 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 | Samples | The number of valid/total samples, the difference being outliers (5th and 95th quantiles) excluded from consideration. |
 */
 
-#![deny(unsafe_code)]
+#![deny(
+	// TODO: clippy::allow_attributes_without_reason,
+	clippy::correctness,
+	unreachable_pub,
+	unsafe_code,
+)]
 
 #![warn(
-	clippy::filetype_is_file,
-	clippy::integer_division,
-	clippy::needless_borrow,
+	clippy::complexity,
 	clippy::nursery,
 	clippy::pedantic,
 	clippy::perf,
-	clippy::suboptimal_flops,
+	clippy::style,
+
+	// TODO: clippy::allow_attributes,
+	clippy::clone_on_ref_ptr,
+	clippy::create_dir,
+	clippy::filetype_is_file,
+	clippy::format_push_string,
+	clippy::get_unwrap,
+	clippy::impl_trait_in_params,
+	clippy::lossy_float_literal,
+	clippy::missing_assert_message,
+	clippy::missing_docs_in_private_items,
+	clippy::needless_raw_strings,
+	clippy::panic_in_result_fn,
+	clippy::pub_without_shorthand,
+	clippy::rest_pat_in_fully_bound_structs,
+	clippy::semicolon_inside_block,
+	clippy::str_to_string,
+	clippy::string_to_string,
+	clippy::todo,
+	clippy::undocumented_unsafe_blocks,
 	clippy::unneeded_field_pattern,
+	clippy::unseparated_literal_suffix,
+	clippy::unwrap_in_result,
+
 	macro_use_extern_crate,
 	missing_copy_implementations,
-	missing_debug_implementations,
 	missing_docs,
 	non_ascii_idents,
 	trivial_casts,
 	trivial_numeric_casts,
-	unreachable_pub,
 	unused_crate_dependencies,
 	unused_extern_crates,
 	unused_import_braces,
 )]
 
-#![allow(
-	clippy::module_name_repetitions,
-	clippy::needless_doctest_main,
-	clippy::redundant_pub_crate,
-)]
+#![allow(clippy::module_name_repetitions)] //Repetition is preferred.
+#![allow(clippy::needless_doctest_main)]   //False positive.
+#![allow(clippy::redundant_pub_crate)]     //Unresolvable.
 
 mod bench;
 mod error;
