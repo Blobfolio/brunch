@@ -25,10 +25,14 @@ use std::{
 
 
 
-#[allow(unsafe_code)]
-/// # Safety: This is non-zero.
+#[allow(unsafe_code)] // 2500 is non-zero.
+/// # Default Sample Count.
 const DEFAULT_SAMPLES: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(2500) };
+
+/// # Default Timeout.
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
+
+/// # Markup for No Change "Value".
 const NO_CHANGE: &str = "\x1b[2m---\x1b[0m";
 
 
@@ -195,9 +199,16 @@ impl Benches {
 /// This struct holds a single "bench" you wish to run. See the main crate
 /// documentation for more information.
 pub struct Bench {
+	/// # Benchmark Name.
 	name: String,
+
+	/// # Sample Limit.
 	samples: NonZeroU32,
+
+	/// # Timeout Limit.
 	timeout: Duration,
+
+	/// # Collected Stats.
 	stats: Option<Result<Stats, BrunchError>>,
 }
 
@@ -328,7 +339,7 @@ impl Bench {
 		self
 	}
 
-	#[allow(unsafe_code)]
+	#[allow(unsafe_code)] // Ten is non-zero.
 	#[must_use]
 	/// # With Sample Limit.
 	///
@@ -516,7 +527,7 @@ impl Default for Table {
 }
 
 impl fmt::Display for Table {
-	#[allow(clippy::many_single_char_names)]
+	#[allow(clippy::many_single_char_names)] // Consistency is preferred.
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		// Maximum column widths.
 		let (w1, w2, w3, mut w4) = self.lens();
@@ -625,8 +636,13 @@ impl Table {
 /// This holds the data for a single row. There are a few different variations,
 /// but it's pretty straight-forward.
 enum TableRow {
+	/// # Normal Row.
 	Normal(String, String, String, String),
+
+	/// # An Error.
 	Error(String, BrunchError),
+
+	/// # A Spacer.
 	Spacer,
 }
 
@@ -650,7 +666,6 @@ impl TableRow {
 
 
 
-#[allow(clippy::option_if_let_else)]
 /// # Format Name.
 ///
 /// Style up a benchmark name by dimming common portions, and highlighting

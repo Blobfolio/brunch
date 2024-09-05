@@ -77,12 +77,13 @@ trait Deserialize<'a>: Sized {
 	fn deserialize(raw: &'a [u8]) -> Option<(Self, &'a [u8])>;
 }
 
+/// # Helper: Deserialize.
 macro_rules! deserialize {
 	($($size:literal $ty:ty),+) => ($(
 		impl Deserialize<'_> for $ty {
 			fn deserialize(raw: &[u8]) -> Option<(Self, &[u8])> {
-				let (bytes, raw) = split_array::<$size>(raw)?;
-				Some((Self::from_be_bytes(bytes), raw))
+				let (bytes, raw) = raw.split_first_chunk::<$size>()?;
+				Some((Self::from_be_bytes(*bytes), raw))
 			}
 		}
 	)+);
@@ -144,7 +145,6 @@ fn deserialize(raw: &[u8]) -> Option<HistoryData> {
 	Some(out)
 }
 
-#[allow(clippy::option_if_let_else)]
 /// # History Path.
 ///
 /// Return the file path history should be written to or read from.
@@ -231,23 +231,6 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 	out
 }
 
-#[allow(unsafe_code)]
-/// # Split Array.
-///
-/// This is basically a rewrite of the nightly-only `slice::split_array_ref`
-/// method, except instead of panicking it will return `None` if the length is
-/// too small to split.
-fn split_array<const S: usize>(raw: &[u8]) -> Option<([u8; S], &[u8])> {
-	if S <= raw.len() {
-		// Safety: we know there are at least S bytes.
-		Some(unsafe {(
-			*(raw.get_unchecked(..S).as_ptr().cast()),
-			raw.get_unchecked(S..),
-		)})
-	}
-	else { None }
-}
-
 /// # Try Dir.
 ///
 /// Test if the thing is a directory and return it.
@@ -281,8 +264,8 @@ mod tests {
 				Stats {
 					total: 2500,
 					valid: 2496,
-					deviation: 0.000000123,
-					mean: 0.0000022,
+					deviation: 0.000_000_123,
+					mean: 0.000_002_2,
 				},
 			),
 			(
@@ -290,8 +273,8 @@ mod tests {
 				Stats {
 					total: 300,
 					valid: 222,
-					deviation: 0.000400123,
-					mean: 0.0000122,
+					deviation: 0.000_400_123,
+					mean: 0.000_012_2,
 				},
 			),
 		];
@@ -323,19 +306,19 @@ mod tests {
 		h.insert("A Suspect One".to_owned(), Stats {
 			total: 200,
 			valid: 300,
-			deviation: 0.000400123,
-			mean: 0.0000122,
+			deviation: 0.000_400_123,
+			mean: 0.000_012_2,
 		});
 		h.insert(String::new(), Stats {
 			total: 500,
 			valid: 300,
-			deviation: 0.000400123,
-			mean: 0.0000122,
+			deviation: 0.000_400_123,
+			mean: 0.000_012_2,
 		});
 
 		// Make sure these exist in the reference struct.
-		assert!(h.get("A Suspect One").is_some());
-		assert!(h.get("").is_some());
+		assert!(h.contains_key("A Suspect One"));
+		assert!(h.contains_key(""));
 
 		// Another round of in/out.
 		let mut s = serialize(&h);
@@ -343,8 +326,8 @@ mod tests {
 
 		// Check they got filtered out during deserialization.
 		assert_eq!(ENTRIES.len(), d.len(), "Deserialized length mismatch.");
-		assert!(d.get("A Suspect One").is_none()); // Shouldn't be here.
-		assert!(d.get("").is_none());
+		assert!(! d.contains_key("A Suspect One")); // Shouldn't be here.
+		assert!(! d.contains_key(""));
 
 		// To be extra safe, let's recheck the valid entries to make sure they
 		// didn't get screwed up in any way.

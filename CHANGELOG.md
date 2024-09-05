@@ -2,6 +2,15 @@
 
 
 
+## [0.6.0](https://github.com/Blobfolio/brunch/releases/tag/v0.6.0) - 2024-09-05
+
+### Changed
+
+* Bump MSRV to `1.77`
+* Minor code changes and lints
+
+
+
 ## [0.5.3](https://github.com/Blobfolio/brunch/releases/tag/v0.5.3) - 2024-02-08
 
 ### Changed
