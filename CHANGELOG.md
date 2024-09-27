@@ -2,6 +2,14 @@
 
 
 
+## [0.6.1](https://github.com/Blobfolio/brunch/releases/tag/v0.6.1) - 2024-09-27
+
+### Changed
+
+* Bump `unicode-width` to `0.2`
+
+
+
 ## [0.6.0](https://github.com/Blobfolio/brunch/releases/tag/v0.6.0) - 2024-09-05
 
 ### Changed
