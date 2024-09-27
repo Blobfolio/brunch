@@ -1,6 +1,6 @@
 [package]
 name = "brunch"
-version = "0.6.0"
+version = "0.6.1"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.77"
@@ -29,7 +29,7 @@ credits-dir = "./"
 
 [dependencies]
 dactyl = "0.7.*"
-unicode-width = "0.1.*"
+unicode-width = "0.2.*"
 
 [dev-dependencies]
 quantogram = "=0.4.4"
