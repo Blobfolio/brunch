@@ -1,7 +1,7 @@
 [package]
 name = "brunch"
 version = "0.6.1"
-authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
+authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.77"
 description = "A simple micro-benchmark runner."
@@ -23,9 +23,6 @@ default-target = "x86_64-unknown-linux-gnu"
 
 [package.metadata.bashman]
 name = "Brunch"
-bash-dir = "./"
-man-dir = "./"
-credits-dir = "./"
 
 [dependencies]
 dactyl = "0.7.*"
