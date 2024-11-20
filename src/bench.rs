@@ -25,7 +25,7 @@ use std::{
 
 
 
-#[allow(unsafe_code)] // 2500 is non-zero.
+#[expect(unsafe_code, reason = "2500 is non-zero.")]
 /// # Default Sample Count.
 const DEFAULT_SAMPLES: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(2500) };
 
@@ -339,7 +339,7 @@ impl Bench {
 		self
 	}
 
-	#[allow(unsafe_code)] // Ten is non-zero.
+	#[expect(unsafe_code, reason = "Ten is non-zero.")]
 	#[must_use]
 	/// # With Sample Limit.
 	///
@@ -527,7 +527,7 @@ impl Default for Table {
 }
 
 impl fmt::Display for Table {
-	#[allow(clippy::many_single_char_names)] // Consistency is preferred.
+	#[expect(clippy::many_single_char_names, reason = "Consistency is preferred.")]
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		// Maximum column widths.
 		let (w1, w2, w3, mut w4) = self.lens();
