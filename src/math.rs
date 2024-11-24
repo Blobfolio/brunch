@@ -308,9 +308,15 @@ impl Abacus {
 ///
 /// Note: values must be pre-sorted.
 fn count_unique(src: &[f64]) -> usize {
-	let mut unique = src.to_vec();
-	unique.dedup_by(|a, b| total_cmp!(a == b));
-	unique.len()
+	let mut count = 0;
+	let mut last = f64::INFINITY;
+	for num in src {
+		if last.total_cmp(num).is_ne() {
+			count += 1;
+			last = *num;
+		}
+	}
+	count
 }
 
 /// # Distance Above and Below.
@@ -344,6 +350,18 @@ mod tests {
 			2.4, 2.4,
 			3.0, 3.0, 3.0,
 		]
+	}
+
+	#[test]
+	fn t_count_unique() {
+		let set = &[
+			1.0,
+			2.0, 2.0,
+			3.0,
+			4.0, 4.0,
+			5.0,
+		];
+		assert_eq!(count_unique(set), 5);
 	}
 
 	#[test]

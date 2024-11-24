@@ -539,12 +539,16 @@ impl fmt::Display for Table {
 				w1 + w2 + w3 + 8
 			};
 
-		// Pre-generate the full-width spacer content.
-		let spacer = format!("\x1b[35m{}\x1b[0m\n", "-".repeat(width));
+		// Pre-generate padding as we'll be slicing lots of things to fit.
+		let pad_len = w1.max(w2).max(w3).max(w4);
+		let mut pad = String::with_capacity(pad_len);
+		for _ in 0..pad_len { pad.push(' '); }
 
-		// Pre-generate padding too. We'll slice this to size each time padding
-		// is needed.
-		let pad = " ".repeat(w1.max(w2).max(w3).max(w4));
+		// Pre-generate the spacer too.
+		let mut spacer = String::with_capacity(10 + width);
+		spacer.push_str("\x1b[35m");
+		for _ in 0..width { spacer.push('-'); }
+		spacer.push_str("\x1b[0m\n");
 
 		// Print each line!
 		for v in &self.0 {
