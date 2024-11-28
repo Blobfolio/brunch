@@ -52,6 +52,13 @@ benches!(
 
 	Bench::new("fibonacci_loop(30)")
 		.run(|| fibonacci_loop(30_usize)),
+
+	// Logical separation can be achieved thusly.
+	Bench::spacer(),
+
+	// Something completely different…
+	Bench::new("u64::MAX.checked_ilog10()")
+		.run(|| u64::MAX.checked_ilog10()),
 );
 
 /*
