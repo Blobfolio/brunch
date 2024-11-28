@@ -2,11 +2,13 @@
 
 
 
-## [0.7.0](https://github.com/Blobfolio/brunch/releases/tag/v0.7.0) - TBD
+## [0.7.0](https://github.com/Blobfolio/brunch/releases/tag/v0.7.0) - 2024-11-28
 
 ### Changed
 
 * Bump MSRV to `1.81`
+* Bump `dactyl` to `0.8`
+* Miscellaneous code changes and lints
 
 
 
