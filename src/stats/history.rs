@@ -150,7 +150,7 @@ fn deserialize(raw: &[u8]) -> Option<HistoryData> {
 /// Return the file path history should be written to or read from.
 fn history_path() -> Option<PathBuf> {
 	// No history?
-	if std::env::var("NO_BRUNCH_HISTORY").map_or(false, |s| s.trim() == "1") { None }
+	if std::env::var("NO_BRUNCH_HISTORY").is_ok_and(|s| s.trim() == "1") { None }
 	// To a specific file?
 	else if let Some(p) = std::env::var_os("BRUNCH_HISTORY") {
 		let p: &Path = p.as_ref();

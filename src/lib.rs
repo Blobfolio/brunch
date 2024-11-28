@@ -173,7 +173,7 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 */
 
 #![deny(
-	// TODO: clippy::allow_attributes_without_reason,
+	clippy::allow_attributes_without_reason,
 	clippy::correctness,
 	unreachable_pub,
 	unsafe_code,
@@ -186,7 +186,7 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 	clippy::perf,
 	clippy::style,
 
-	// TODO: clippy::allow_attributes,
+	clippy::allow_attributes,
 	clippy::clone_on_ref_ptr,
 	clippy::create_dir,
 	clippy::filetype_is_file,
@@ -220,9 +220,9 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 	unused_import_braces,
 )]
 
-#![allow(clippy::module_name_repetitions)] //Repetition is preferred.
-#![allow(clippy::needless_doctest_main)]   //False positive.
-#![allow(clippy::redundant_pub_crate)]     //Unresolvable.
+#![expect(clippy::module_name_repetitions, reason = "Repetition is preferred.")]
+#![expect(clippy::needless_doctest_main, reason = "False positive.")]
+#![expect(clippy::redundant_pub_crate, reason = "Unresolvable.")]
 
 mod bench;
 mod error;

@@ -75,7 +75,7 @@ impl Abacus {
 	/// # Length.
 	pub(crate) const fn len(&self) -> usize { self.len }
 
-	#[allow(clippy::cast_precision_loss)] // It is what it is.
+	#[expect(clippy::cast_precision_loss, reason = "It is what it is.")]
 	/// # Float Length.
 	const fn f_len(&self) -> f64 { self.len as f64 }
 }
@@ -164,8 +164,11 @@ impl Abacus {
 			.count()
 	}
 
-	#[allow(clippy::cast_possible_truncation)] // False positive.
-	#[allow(clippy::cast_sign_loss)]           // False positive.
+	#[expect(
+		clippy::cast_possible_truncation,
+		clippy::cast_sign_loss,
+		reason = "False positive.",
+	)]
 	/// # Quantile.
 	///
 	/// Return the quantile at the corresponding percentage. Values are clamped
@@ -305,9 +308,15 @@ impl Abacus {
 ///
 /// Note: values must be pre-sorted.
 fn count_unique(src: &[f64]) -> usize {
-	let mut unique = src.to_vec();
-	unique.dedup_by(|a, b| total_cmp!(a == b));
-	unique.len()
+	let mut count = 0;
+	let mut last = f64::INFINITY;
+	for num in src {
+		if last.total_cmp(num).is_ne() {
+			count += 1;
+			last = *num;
+		}
+	}
+	count
 }
 
 /// # Distance Above and Below.
@@ -344,7 +353,19 @@ mod tests {
 	}
 
 	#[test]
-	#[allow(clippy::float_cmp)] // It is what it is.
+	fn t_count_unique() {
+		let set = &[
+			1.0,
+			2.0, 2.0,
+			3.0,
+			4.0, 4.0,
+			5.0,
+		];
+		assert_eq!(count_unique(set), 5);
+	}
+
+	#[test]
+	#[expect(clippy::float_cmp, reason = "It is what it is.")]
 	/// # Compare Metrics.
 	///
 	/// This uses the third-party `Quantogram` struct to sanity-check the

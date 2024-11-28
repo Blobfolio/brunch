@@ -25,7 +25,7 @@ use std::{
 
 
 
-#[allow(unsafe_code)] // 2500 is non-zero.
+#[expect(unsafe_code, reason = "2500 is non-zero.")]
 /// # Default Sample Count.
 const DEFAULT_SAMPLES: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(2500) };
 
@@ -339,7 +339,7 @@ impl Bench {
 		self
 	}
 
-	#[allow(unsafe_code)] // Ten is non-zero.
+	#[expect(unsafe_code, reason = "Ten is non-zero.")]
 	#[must_use]
 	/// # With Sample Limit.
 	///
@@ -527,7 +527,7 @@ impl Default for Table {
 }
 
 impl fmt::Display for Table {
-	#[allow(clippy::many_single_char_names)] // Consistency is preferred.
+	#[expect(clippy::many_single_char_names, reason = "Consistency is preferred.")]
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		// Maximum column widths.
 		let (w1, w2, w3, mut w4) = self.lens();
@@ -539,12 +539,16 @@ impl fmt::Display for Table {
 				w1 + w2 + w3 + 8
 			};
 
-		// Pre-generate the full-width spacer content.
-		let spacer = format!("\x1b[35m{}\x1b[0m\n", "-".repeat(width));
+		// Pre-generate padding as we'll be slicing lots of things to fit.
+		let pad_len = w1.max(w2).max(w3).max(w4);
+		let mut pad = String::with_capacity(pad_len);
+		for _ in 0..pad_len { pad.push(' '); }
 
-		// Pre-generate padding too. We'll slice this to size each time padding
-		// is needed.
-		let pad = " ".repeat(w1.max(w2).max(w3).max(w4));
+		// Pre-generate the spacer too.
+		let mut spacer = String::with_capacity(10 + width);
+		spacer.push_str("\x1b[35m");
+		for _ in 0..width { spacer.push('-'); }
+		spacer.push_str("\x1b[0m\n");
 
 		// Print each line!
 		for v in &self.0 {

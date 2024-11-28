@@ -1,9 +1,9 @@
 [package]
 name = "brunch"
-version = "0.6.1"
-authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
+version = "0.7.0"
+authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2021"
-rust-version = "1.77"
+rust-version = "1.81"
 description = "A simple micro-benchmark runner."
 license = "WTFPL"
 repository = "https://github.com/Blobfolio/brunch"
@@ -23,12 +23,9 @@ default-target = "x86_64-unknown-linux-gnu"
 
 [package.metadata.bashman]
 name = "Brunch"
-bash-dir = "./"
-man-dir = "./"
-credits-dir = "./"
 
 [dependencies]
-dactyl = "0.7.*"
+dactyl = "0.8.*"
 unicode-width = "0.2.*"
 
 [dev-dependencies]
