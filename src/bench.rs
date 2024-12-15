@@ -25,9 +25,8 @@ use std::{
 
 
 
-#[expect(unsafe_code, reason = "2500 is non-zero.")]
 /// # Default Sample Count.
-const DEFAULT_SAMPLES: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(2500) };
+const DEFAULT_SAMPLES: NonZeroU32 = NonZeroU32::new(2500).unwrap();
 
 /// # Default Timeout.
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -339,7 +338,7 @@ impl Bench {
 		self
 	}
 
-	#[expect(unsafe_code, reason = "Ten is non-zero.")]
+	#[expect(clippy::missing_panics_doc, reason = "Value is checked.")]
 	#[must_use]
 	/// # With Sample Limit.
 	///
@@ -369,13 +368,11 @@ impl Bench {
     /// );
 	/// ```
 	pub const fn with_samples(mut self, samples: u32) -> Self {
-		if samples < MIN_SAMPLES {
-			// Safety: ten is non-zero.
-			self.samples = unsafe { NonZeroU32::new_unchecked(MIN_SAMPLES) };
-		}
+		if samples < MIN_SAMPLES.get() { self.samples = MIN_SAMPLES; }
 		else {
-			// Safety: anything 10+ is also non-zero.
-			self.samples = unsafe { NonZeroU32::new_unchecked(samples) };
+			// The compiler should optimize this out. MIN_SAMPLES is non-zero
+			// so samples must be too.
+			self.samples = NonZeroU32::new(samples).unwrap();
 		}
 		self
 	}

@@ -8,6 +8,7 @@ use std::{
 	ffi::OsStr,
 	fs::File,
 	io::Write,
+	num::NonZeroU32,
 	path::{
 		Path,
 		PathBuf,
@@ -89,6 +90,14 @@ macro_rules! deserialize {
 	)+);
 }
 
+impl Deserialize<'_> for NonZeroU32 {
+	fn deserialize(raw: &[u8]) -> Option<(Self, &[u8])> {
+		let (num, slice) = u32::deserialize(raw)?;
+		let num = Self::new(num)?;
+		Some((num, slice))
+	}
+}
+
 deserialize!(2 u16, 4 u32, 8 f64);
 
 impl<'a> Deserialize<'a> for &'a str {
@@ -106,8 +115,8 @@ impl<'a> Deserialize<'a> for &'a str {
 
 impl Deserialize<'_> for Stats {
 	fn deserialize(raw: &[u8]) -> Option<(Self, &[u8])> {
-		let (total, raw) = u32::deserialize(raw)?;
-		let (valid, raw) = u32::deserialize(raw)?;
+		let (total, raw) = NonZeroU32::deserialize(raw)?;
+		let (valid, raw) = NonZeroU32::deserialize(raw)?;
 		let (deviation, raw) = f64::deserialize(raw)?;
 		let (mean, raw) = f64::deserialize(raw)?;
 
@@ -221,8 +230,8 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 			out.extend_from_slice(lbl.as_bytes());
 
 			// Total, valid, deviation, and mean follow, in that order.
-			out.extend_from_slice(&s.total.to_be_bytes());
-			out.extend_from_slice(&s.valid.to_be_bytes());
+			out.extend_from_slice(s.total.get().to_be_bytes().as_slice());
+			out.extend_from_slice(s.valid.get().to_be_bytes().as_slice());
 			out.extend_from_slice(&s.deviation.to_be_bytes());
 			out.extend_from_slice(&s.mean.to_be_bytes());
 		}
@@ -262,8 +271,8 @@ mod tests {
 			(
 				"The First One",
 				Stats {
-					total: 2500,
-					valid: 2496,
+					total: NonZeroU32::new(2500).unwrap(),
+					valid: NonZeroU32::new(2496).unwrap(),
 					deviation: 0.000_000_123,
 					mean: 0.000_002_2,
 				},
@@ -271,8 +280,8 @@ mod tests {
 			(
 				"The Second One",
 				Stats {
-					total: 300,
-					valid: 222,
+					total: NonZeroU32::new(300).unwrap(),
+					valid: NonZeroU32::new(222).unwrap(),
 					deviation: 0.000_400_123,
 					mean: 0.000_012_2,
 				},
@@ -304,14 +313,14 @@ mod tests {
 		// Let's add a logically-suspect entry to the history, and make sure
 		// it gets stripped out during deserialize.
 		h.insert("A Suspect One".to_owned(), Stats {
-			total: 200,
-			valid: 300,
+			total: NonZeroU32::new(200).unwrap(),
+			valid: NonZeroU32::new(300).unwrap(),
 			deviation: 0.000_400_123,
 			mean: 0.000_012_2,
 		});
 		h.insert(String::new(), Stats {
-			total: 500,
-			valid: 300,
+			total: NonZeroU32::new(500).unwrap(),
+			valid: NonZeroU32::new(300).unwrap(),
 			deviation: 0.000_400_123,
 			mean: 0.000_012_2,
 		});

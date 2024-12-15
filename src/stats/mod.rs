@@ -17,6 +17,7 @@ use dactyl::{
 };
 use std::{
 	cmp::Ordering,
+	num::NonZeroU32,
 	time::Duration,
 };
 
@@ -26,10 +27,10 @@ use std::{
 /// # Runtime Stats!
 pub(crate) struct Stats {
 	/// # Total Samples.
-	total: u32,
+	total: NonZeroU32,
 
 	/// # Valid Samples.
-	valid: u32,
+	valid: NonZeroU32,
 
 	/// # Standard Deviation.
 	deviation: f64,
@@ -42,8 +43,9 @@ impl TryFrom<Vec<Duration>> for Stats {
 	type Error = BrunchError;
 	fn try_from(samples: Vec<Duration>) -> Result<Self, Self::Error> {
 		let total = u32::saturating_from(samples.len());
+		let total = NonZeroU32::new(total).ok_or(BrunchError::TooSmall(total))?;
 		if total < MIN_SAMPLES {
-			return Err(BrunchError::TooSmall(total));
+			return Err(BrunchError::TooSmall(total.get()));
 		}
 
 		// Crunch!
@@ -51,6 +53,7 @@ impl TryFrom<Vec<Duration>> for Stats {
 		calc.prune_outliers();
 
 		let valid = u32::saturating_from(calc.len());
+		let valid = NonZeroU32::new(valid).ok_or(BrunchError::TooWild)?;
 		if valid < MIN_SAMPLES {
 			return Err(BrunchError::TooWild);
 		}
@@ -118,7 +121,9 @@ impl Stats {
 	/// # Samples.
 	///
 	/// Return the valid/total samples.
-	pub(crate) const fn samples(self) -> (u32, u32) { (self.valid, self.total) }
+	pub(crate) const fn samples(self) -> (NonZeroU32, NonZeroU32) {
+		(self.valid, self.total)
+	}
 
 	/// # Is Valid?
 	fn is_valid(self) -> bool {
@@ -140,24 +145,24 @@ mod tests {
 	#[test]
 	fn t_stats_valid() {
 		let mut stat = Stats {
-			total: 2500,
-			valid: 2496,
+			total: NonZeroU32::new(2500).unwrap(),
+			valid: NonZeroU32::new(2496).unwrap(),
 			deviation: 0.000_000_123,
 			mean: 0.000_002_2,
 		};
 
 		assert!(stat.is_valid(), "Stat should be valid.");
 
-		stat.total = 100;
+		stat.total = NonZeroU32::new(100).unwrap();
 		assert!(! stat.is_valid(), "Insufficient total.");
 
-		stat.valid = 100;
+		stat.valid = NonZeroU32::new(100).unwrap();
 		assert!(stat.is_valid(), "Stat should be valid.");
 
-		stat.valid = 30;
+		stat.valid = NonZeroU32::new(30).unwrap();
 		assert!(! stat.is_valid(), "Insufficient samples.");
 
-		stat.valid = 100;
+		stat.valid = NonZeroU32::new(100).unwrap();
 		assert!(stat.is_valid(), "Stat should be valid.");
 
 		stat.deviation = f64::NAN;
