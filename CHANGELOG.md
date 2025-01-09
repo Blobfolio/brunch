@@ -2,6 +2,14 @@
 
 
 
+## [0.8.1](https://github.com/Blobfolio/brunch/releases/tag/v0.8.1) - 2025-01-09
+
+### Changed
+
+* Miscellaneous code changes and lints
+
+
+
 ## [0.8.0](https://github.com/Blobfolio/brunch/releases/tag/v0.8.0) - 2024-12-07
 
 ### Changed
