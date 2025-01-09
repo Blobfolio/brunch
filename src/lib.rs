@@ -172,11 +172,12 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 | Samples | The number of valid/total samples, the difference being outliers (5th and 95th quantiles) excluded from consideration. |
 */
 
+#![forbid(unsafe_code)]
+
 #![deny(
 	clippy::allow_attributes_without_reason,
 	clippy::correctness,
 	unreachable_pub,
-	unsafe_code,
 )]
 
 #![warn(
@@ -220,7 +221,6 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 	unused_import_braces,
 )]
 
-#![expect(clippy::module_name_repetitions, reason = "Repetition is preferred.")]
 #![expect(clippy::needless_doctest_main, reason = "False positive.")]
 #![expect(clippy::redundant_pub_crate, reason = "Unresolvable.")]
 
@@ -243,8 +243,9 @@ pub(crate) use stats::{
 	history::History,
 	Stats,
 };
+use std::num::NonZeroU32;
 
 
 
 /// # Minimum Number of Samples.
-pub(crate) const MIN_SAMPLES: u32 = 100;
+pub(crate) const MIN_SAMPLES: NonZeroU32 = NonZeroU32::new(100).unwrap();

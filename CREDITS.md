@@ -1,7 +1,7 @@
 # Project Dependencies
     Package:   brunch
-    Version:   0.8.0
-    Generated: 2024-12-08 04:03:48 UTC
+    Version:   0.8.1
+    Generated: 2025-01-09 17:40:08 UTC
 
 | Package | Version | Author(s) | License |
 | ---- | ---- | ---- | ---- |
