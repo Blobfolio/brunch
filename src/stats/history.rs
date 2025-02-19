@@ -232,8 +232,8 @@ fn serialize(history: &HistoryData) -> Vec<u8> {
 			// Total, valid, deviation, and mean follow, in that order.
 			out.extend_from_slice(s.total.get().to_be_bytes().as_slice());
 			out.extend_from_slice(s.valid.get().to_be_bytes().as_slice());
-			out.extend_from_slice(&s.deviation.to_be_bytes());
-			out.extend_from_slice(&s.mean.to_be_bytes());
+			out.extend_from_slice(s.deviation.to_be_bytes().as_slice());
+			out.extend_from_slice(s.mean.to_be_bytes().as_slice());
 		}
 	}
 
