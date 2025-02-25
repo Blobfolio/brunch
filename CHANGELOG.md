@@ -2,11 +2,22 @@
 
 
 
+## [0.9.0](https://github.com/Blobfolio/brunch/releases/tag/v0.9.0) - 2025-02-25
+
+### Changed
+
+* Bump `dactyl` to `0.10`
+* Bump MSRV to `1.85`
+* Bump Rust edition to `2024`
+* Miscellaneous code cleanup and lints
+
+
+
 ## [0.8.1](https://github.com/Blobfolio/brunch/releases/tag/v0.8.1) - 2025-01-09
 
 ### Changed
 
-* Miscellaneous code changes and lints
+* Miscellaneous code cleanup and lints
 
 
 
