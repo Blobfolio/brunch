@@ -2,6 +2,15 @@
 
 
 
+## [0.9.0](https://github.com/Blobfolio/brunch/releases/tag/v0.9.0) - TBD
+
+### Changed
+
+* Bump MSRV to `1.85`
+* Bump Rust edition to `2024`
+
+
+
 ## [0.8.1](https://github.com/Blobfolio/brunch/releases/tag/v0.8.1) - 2025-01-09
 
 ### Changed
