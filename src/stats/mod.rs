@@ -15,6 +15,7 @@ use dactyl::{
 	total_cmp,
 	traits::SaturatingFrom,
 };
+use fyi_ansi::ansi;
 use std::{
 	cmp::Ordering,
 	num::NonZeroU32,
@@ -80,18 +81,17 @@ impl Stats {
 		let lo = self.deviation.mul_add(-2.0, self.mean);
 		let hi = self.deviation.mul_add(2.0, self.mean);
 		if total_cmp!((other.mean) < lo) || total_cmp!((other.mean) > hi) {
-			let (color, sign, diff) = match self.mean.total_cmp(&other.mean) {
-				Ordering::Less => (92, "-", other.mean - self.mean),
-				Ordering::Equal => return None,
-				Ordering::Greater => (91, "+", self.mean - other.mean),
+			return match self.mean.total_cmp(&other.mean) {
+				Ordering::Less => Some(format!(
+					ansi!((light_green) "-{}"),
+					NicePercent::from((other.mean - self.mean) / other.mean)
+				)),
+				Ordering::Equal => None,
+				Ordering::Greater => Some(format!(
+					ansi!((light_red) "+{}"),
+					NicePercent::from((self.mean - other.mean) / other.mean)
+				)),
 			};
-
-			return Some(format!(
-				"\x1b[{}m{}{}\x1b[0m",
-				color,
-				sign,
-				NicePercent::from(diff / other.mean),
-			));
 		}
 
 		None
@@ -115,7 +115,11 @@ impl Stats {
 				(self.mean, "s ")
 			};
 
-		format!("\x1b[0;1m{} {unit}\x1b[0m", NiceFloat::from(mean).precise_str(2))
+		format!(
+			ansi!((reset, bold) "{} {}"),
+			NiceFloat::from(mean).precise_str(2),
+			unit,
+		)
 	}
 
 	/// # Samples.

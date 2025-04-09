@@ -26,6 +26,7 @@ name = "Brunch"
 
 [dependencies]
 dactyl = "0.10.*"
+fyi_ansi = "2.0.*"
 unicode-width = "0.2.*"
 
 [dev-dependencies]
