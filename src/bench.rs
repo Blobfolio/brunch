@@ -312,7 +312,7 @@ impl Bench {
 	}
 
 	/// # Is Spacer?
-	fn is_spacer(&self) -> bool { self.name.is_empty() }
+	const fn is_spacer(&self) -> bool { self.name.is_empty() }
 
 	#[must_use]
 	/// # With Time Limit.

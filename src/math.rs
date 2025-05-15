@@ -268,10 +268,10 @@ impl Abacus {
 				let hi_diff = hi - quantile;
 
 				if lo_diff >= hi_diff * 2.0 {
-					(lo + quantile) / 2.0
+					f64::midpoint(lo, quantile)
 				}
 				else if hi_diff >= lo_diff * 2.0 {
-					(hi + quantile) / 2.0
+					f64::midpoint(hi, quantile)
 				}
 				else { 0.0 }
 			}
