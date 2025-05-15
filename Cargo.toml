@@ -1,9 +1,9 @@
 [package]
 name = "brunch"
-version = "0.9.0"
+version = "0.10.0"
 authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.87"
 description = "A simple micro-benchmark runner."
 license = "WTFPL"
 repository = "https://github.com/Blobfolio/brunch"
@@ -26,6 +26,7 @@ name = "Brunch"
 
 [dependencies]
 dactyl = "0.10.*"
+fyi_ansi = "2.0.*"
 unicode-width = "0.2.*"
 
 [dev-dependencies]
