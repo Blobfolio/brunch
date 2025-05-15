@@ -2,12 +2,16 @@
 
 
 
-## [0.10.0](https://github.com/Blobfolio/brunch/releases/tag/v0.10.0) - 2025-05-15
+## [0.10.1](https://github.com/Blobfolio/brunch/releases/tag/v0.10.1) - 2025-05-15
 
 ### Changed
 
 * Bump MSRV to `1.87`
 * Miscellaneous code cleanup and lints
+
+### Fixed
+
+* Macro error introduced in (yanked) `0.10.0` release
 
 
 

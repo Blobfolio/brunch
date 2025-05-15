@@ -77,7 +77,7 @@ macro_rules! benches {
 		fn main() {
 			// Announce that we've started.
 			::std::eprint!(::std::concat!(
-				::fyi_ansi::ansi!((bold, 199) "Starting:"),
+				$crate::fyi_ansi::ansi!((bold, 199) "Starting:"),
 				" Running benchmark(s). Stand by!\n\n"
 			));
 
@@ -85,7 +85,7 @@ macro_rules! benches {
 			let mut benches = $crate::Benches::default();
 			$(
 				// Print a dot to show some progress.
-				::std::eprint!(::fyi_ansi::ansi!((bold, blue) "•"));
+				::std::eprint!($crate::fyi_ansi::ansi!((bold, blue) "•"));
 
 				benches.push($benches);
 			)+

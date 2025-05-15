@@ -232,7 +232,7 @@ mod stats;
 pub(crate) mod util;
 
 
-
+#[doc(hidden)] pub use fyi_ansi;
 pub use bench::{
 	Bench,
 	Benches,
