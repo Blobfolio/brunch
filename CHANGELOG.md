@@ -2,6 +2,14 @@
 
 
 
+## [0.10.2](https://github.com/Blobfolio/brunch/releases/tag/v0.10.2) - 2025-05-15
+
+### Changed
+
+* Bump `fyi_ansi` to `2.1`
+
+
+
 ## [0.10.1](https://github.com/Blobfolio/brunch/releases/tag/v0.10.1) - 2025-05-15
 
 ### Changed
