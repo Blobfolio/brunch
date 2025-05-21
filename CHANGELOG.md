@@ -2,6 +2,15 @@
 
 
 
+## [0.10.3](https://github.com/Blobfolio/brunch/releases/tag/v0.10.3) - 2025-05-20
+
+### Changed
+
+* Bump `dactyl` to `0.11`
+* Remove `fyi_ansi`
+
+
+
 ## [0.10.2](https://github.com/Blobfolio/brunch/releases/tag/v0.10.2) - 2025-05-15
 
 ### Changed

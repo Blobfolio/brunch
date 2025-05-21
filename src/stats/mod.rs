@@ -15,7 +15,6 @@ use dactyl::{
 	total_cmp,
 	traits::SaturatingFrom,
 };
-use fyi_ansi::ansi;
 use std::{
 	cmp::Ordering,
 	num::NonZeroU32,
@@ -83,12 +82,12 @@ impl Stats {
 		if total_cmp!((other.mean) < lo) || total_cmp!((other.mean) > hi) {
 			return match self.mean.total_cmp(&other.mean) {
 				Ordering::Less => Some(format!(
-					ansi!((light_green) "-{}"),
+					"\x1b[92m-{}\x1b[0m",
 					NicePercent::from((other.mean - self.mean) / other.mean)
 				)),
 				Ordering::Equal => None,
 				Ordering::Greater => Some(format!(
-					ansi!((light_red) "+{}"),
+					"\x1b[91m+{}\x1b[0m",
 					NicePercent::from((self.mean - other.mean) / other.mean)
 				)),
 			};
@@ -116,7 +115,7 @@ impl Stats {
 			};
 
 		format!(
-			ansi!((reset, bold) "{} {}"),
+			"\x1b[0;1m{} {}\x1b[0m",
 			NiceFloat::from(mean).precise_str(2),
 			unit,
 		)

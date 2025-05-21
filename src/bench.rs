@@ -13,11 +13,6 @@ use dactyl::{
 	NiceU32,
 	traits::SaturatingFrom,
 };
-use fyi_ansi::{
-	ansi,
-	csi,
-	dim,
-};
 use std::{
 	fmt,
 	hint::black_box,
@@ -37,7 +32,7 @@ const DEFAULT_SAMPLES: NonZeroU32 = NonZeroU32::new(2500).unwrap();
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 
 /// # Markup for No Change "Value".
-const NO_CHANGE: &str = dim!("---");
+const NO_CHANGE: &str = "\x1b[2m---\x1b[0m";
 
 
 
@@ -152,7 +147,7 @@ impl Benches {
 		// If there weren't any benchmarks, just print an error.
 		if self.0.is_empty() {
 			eprintln!(
-				concat!(ansi!((bold, light_red) "Error:"), " {}"),
+				"\x1b[1;91mError:\x1b[0m {}",
 				BrunchError::NoBench
 			);
 			return;
@@ -521,10 +516,10 @@ impl Default for Table {
 	fn default() -> Self {
 		Self(vec![
 			TableRow::Normal(
-				concat!(csi!(bold, light_magenta), "Method").to_owned(),
+				"\x1b[1;95mMethod".to_owned(),
 				"Mean".to_owned(),
-				"Samples".to_owned(),
-				concat!("Change", csi!()).to_owned(),
+				"Samples\x1b[0m".to_owned(),
+				"\x1b[1;95mChange\x1b[0m".to_owned(),
 			),
 			TableRow::Spacer,
 		])
@@ -551,9 +546,9 @@ impl fmt::Display for Table {
 
 		// Pre-generate the spacer too.
 		let mut spacer = String::with_capacity(10 + width);
-		spacer.push_str(csi!(magenta));
+		spacer.push_str("\x1b[35m");
 		for _ in 0..width { spacer.push('-'); }
-		spacer.push_str(concat!(csi!(), "\n"));
+		spacer.push_str("\x1b[0m\n");
 
 		// Print each line!
 		for v in &self.0 {
@@ -573,8 +568,11 @@ impl fmt::Display for Table {
 					&pad[..w3 - c3], c,
 				)?,
 				TableRow::Error(a, b) => writeln!(
-					f, concat!("{}{}    ", ansi!((dark_orange) "{}")),
-					a, &pad[..w1 - c1], b,
+					f,
+					"{}{}    \x1b[38;5;208m{}\x1b[0m",
+					a,
+					&pad[..w1 - c1],
+					b,
 				)?,
 				TableRow::Spacer => f.write_str(&spacer)?,
 			}
@@ -598,11 +596,7 @@ impl Table {
 						.unwrap_or_else(|| NO_CHANGE.to_owned());
 					let (valid, total) = s.samples();
 					let samples = format!(
-						concat!(
-							csi!(dim), "{}",
-							csi!(reset, magenta), "/",
-							ansi!((reset, dim) "{}"),
-						),
+						"\x1b[2m{}\x1b[0;35m/\x1b[0;2m{}\x1b[0m",
 						NiceU32::from(valid),
 						NiceU32::from(total),
 					);
@@ -721,24 +715,24 @@ fn format_name(mut name: Vec<char>, names: &[Vec<char>]) -> String {
 	}
 
 	if pos == 0 {
-		csi!(light_blue).chars()
+		"\x1b[94m".chars()
 			.chain(name)
-			.chain(csi!().chars())
+			.chain("\x1b[0m".chars())
 			.collect()
 	}
 	else if pos == len {
-		csi!(blue).chars()
+		"\x1b[34m".chars()
 			.chain(name)
-			.chain(csi!().chars())
+			.chain("\x1b[0m".chars())
 			.collect()
 	}
 	else {
 		let b = name.split_off(pos);
-		csi!(blue).chars()
+		"\x1b[34m".chars()
 			.chain(name)
-			.chain(csi!(light_blue).chars())
+			.chain("\x1b[94m".chars())
 			.chain(b)
-			.chain(csi!().chars())
+			.chain("\x1b[0m".chars())
 			.collect()
 	}
 }
