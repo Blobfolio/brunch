@@ -263,7 +263,6 @@ fn try_dir<P: AsRef<Path>>(dir: Option<P>) -> Option<PathBuf> {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use dactyl::total_cmp;
 
 	#[test]
 	fn t_serialize() {
@@ -306,8 +305,8 @@ mod tests {
 			let tmp = d.get(lbl).expect("Missing entry!");
 			assert_eq!(stat.total, tmp.total, "Total changed.");
 			assert_eq!(stat.valid, tmp.valid, "Valid changed.");
-			assert!(total_cmp!((stat.deviation) == (tmp.deviation)), "Deviation changed.");
-			assert!(total_cmp!((stat.mean) == (tmp.mean)), "Mean changed.");
+			assert!(stat.deviation.total_cmp(&tmp.deviation).is_eq(), "Deviation changed.");
+			assert!(stat.mean.total_cmp(&tmp.mean).is_eq(), "Mean changed.");
 		}
 
 		// Let's add a logically-suspect entry to the history, and make sure
@@ -344,8 +343,8 @@ mod tests {
 			let tmp = d.get(lbl).expect("Missing entry!");
 			assert_eq!(stat.total, tmp.total, "Total changed.");
 			assert_eq!(stat.valid, tmp.valid, "Valid changed.");
-			assert!(total_cmp!((stat.deviation) == (tmp.deviation)), "Deviation changed.");
-			assert!(total_cmp!((stat.mean) == (tmp.mean)), "Mean changed.");
+			assert!(stat.deviation.total_cmp(&tmp.deviation).is_eq(), "Deviation changed.");
+			assert!(stat.mean.total_cmp(&tmp.mean).is_eq(), "Mean changed.");
 		}
 
 		// Make sure deserializing doesn't do anything on bad data.

@@ -12,7 +12,6 @@ use crate::{
 use dactyl::{
 	NiceFloat,
 	NicePercent,
-	total_cmp,
 	traits::SaturatingFrom,
 };
 use std::{
@@ -79,7 +78,7 @@ impl Stats {
 	pub(crate) fn is_deviant(self, other: Self) -> Option<String> {
 		let lo = self.deviation.mul_add(-2.0, self.mean);
 		let hi = self.deviation.mul_add(2.0, self.mean);
-		if total_cmp!((other.mean) < lo) || total_cmp!((other.mean) > hi) {
+		if other.mean.total_cmp(&lo).is_lt() || other.mean.total_cmp(&hi).is_gt() {
 			return match self.mean.total_cmp(&other.mean) {
 				Ordering::Less => Some(format!(
 					"\x1b[92m-{}\x1b[0m",
@@ -101,13 +100,13 @@ impl Stats {
 	/// Return the mean rescaled to the most appropriate unit.
 	pub(crate) fn nice_mean(self) -> String {
 		let (mean, unit) =
-			if total_cmp!((self.mean) < 0.000_001) {
+			if self.mean.total_cmp(&0.000_001).is_lt() {
 				(self.mean * 1_000_000_000.0, "ns")
 			}
-			else if total_cmp!((self.mean) < 0.001) {
+			else if self.mean.total_cmp(&0.001).is_lt() {
 				(self.mean * 1_000_000.0, "\u{3bc}s")
 			}
-			else if total_cmp!((self.mean) < 1.0) {
+			else if self.mean.total_cmp(&1.0).is_lt() {
 				(self.mean * 1_000.0, "ms")
 			}
 			else {
@@ -133,9 +132,9 @@ impl Stats {
 		MIN_SAMPLES <= self.valid &&
 		self.valid <= self.total &&
 		self.deviation.is_finite() &&
-		total_cmp!((self.deviation) >= 0.0) &&
+		self.deviation.total_cmp(&0.0).is_ge() &&
 		self.mean.is_finite() &&
-		total_cmp!((self.mean) >= 0.0)
+		self.mean.total_cmp(&0.0).is_ge()
 	}
 }
 
