@@ -2,10 +2,7 @@
 # Brunch: Math
 */
 
-use dactyl::{
-	total_cmp,
-	traits::IntDivFloat,
-};
+use dactyl::NiceFloat;
 use std::{
 	cmp::Ordering,
 	time::Duration,
@@ -131,7 +128,7 @@ impl Abacus {
 			let hi = iqr.mul_add(1.5, q3);
 
 			// Remove outliers.
-			self.set.retain(|&s| total_cmp!(lo <= s) && total_cmp!(s <= hi));
+			self.set.retain(|&s| lo.total_cmp(&s).is_le() && s.total_cmp(&hi).is_le());
 
 			// Recalculate totals if the length changed.
 			let len = self.set.len();
@@ -151,7 +148,7 @@ impl Abacus {
 	fn count_above(&self, num: f64) -> usize {
 		self.set.iter()
 			.rev()
-			.take_while(|&&n| total_cmp!(n > num))
+			.take_while(|&&n| n.total_cmp(&num).is_gt())
 			.count()
 	}
 
@@ -160,7 +157,7 @@ impl Abacus {
 	/// Return the total number of entries with values lower than the target.
 	fn count_below(&self, num: f64) -> usize {
 		self.set.iter()
-			.take_while(|&&n| total_cmp!(n < num))
+			.take_while(|&&n| n.total_cmp(&num).is_lt())
 			.count()
 	}
 
@@ -283,7 +280,7 @@ impl Abacus {
 	/// Return the largest entry in the set with a value lower than the target,
 	/// if any.
 	fn step_down(&self, num: f64) -> Option<f64> {
-		let pos = self.set.iter().position(|&n| total_cmp!(n == num))?;
+		let pos = self.set.iter().position(|&n| n.total_cmp(&num).is_eq())?;
 		if 0 < pos { Some(self.set[pos - 1]) }
 		else { None }
 	}
@@ -293,7 +290,7 @@ impl Abacus {
 	/// Return the smallest entry in the set with a value larger than the
 	/// target, if any.
 	fn step_up(&self, num: f64) -> Option<f64> {
-		let pos = self.set.iter().rposition(|&n| total_cmp!(n == num))?;
+		let pos = self.set.iter().rposition(|&n| n.total_cmp(&num).is_eq())?;
 		if pos + 1 < self.len { Some(self.set[pos + 1]) }
 		else { None }
 	}
@@ -323,11 +320,12 @@ fn count_unique(src: &[f64]) -> usize {
 ///
 /// This averages the absolute distance between the below counts and above
 /// counts. An ideal distribution would return `0.0`.
-fn quantile_diff(below: usize, above: usize, ref_below: usize, ref_above: usize) -> f64 {
+const fn quantile_diff(below: usize, above: usize, ref_below: usize, ref_above: usize) -> f64 {
 	let below = below.abs_diff(ref_below);
 	let above = above.abs_diff(ref_above);
 
-	(below + above).div_float(2).unwrap_or_default()
+	if let Ok(out) = NiceFloat::div_usize(below + above, 2) { out }
+	else { 0.0 }
 }
 
 
