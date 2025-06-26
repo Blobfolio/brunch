@@ -2,6 +2,16 @@
 
 
 
+## [0.11.0](https://github.com/Blobfolio/brunch/releases/tag/v0.11.0) - 2025-06-26
+
+### Changed
+
+* Bump `dactyl` to `0.13`
+* Bump MSRV to `1.88`
+* Miscellaneous code cleanup and lints
+
+
+
 ## [0.10.4](https://github.com/Blobfolio/brunch/releases/tag/v0.10.3) - 2025-06-01
 
 ### Changed
