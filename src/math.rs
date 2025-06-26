@@ -2,7 +2,7 @@
 # Brunch: Math
 */
 
-use dactyl::traits::IntDivFloat;
+use dactyl::NiceFloat;
 use std::{
 	cmp::Ordering,
 	time::Duration,
@@ -320,11 +320,12 @@ fn count_unique(src: &[f64]) -> usize {
 ///
 /// This averages the absolute distance between the below counts and above
 /// counts. An ideal distribution would return `0.0`.
-fn quantile_diff(below: usize, above: usize, ref_below: usize, ref_above: usize) -> f64 {
+const fn quantile_diff(below: usize, above: usize, ref_below: usize, ref_above: usize) -> f64 {
 	let below = below.abs_diff(ref_below);
 	let above = above.abs_diff(ref_above);
 
-	(below + above).div_float(2).unwrap_or_default()
+	if let Ok(out) = NiceFloat::div_usize(below + above, 2) { out }
+	else { 0.0 }
 }
 
 
