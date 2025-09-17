@@ -105,34 +105,29 @@ bench BENCH="":
 # Get/Set version.
 version:
 	#!/usr/bin/env bash
+	set -e
 
 	# Current version.
-	_ver1="$( toml get "{{ justfile_directory() }}/Cargo.toml" package.version | \
-		sed 's/"//g' )"
+	_ver1="$( tomli query -f "{{ justfile_directory() }}/Cargo.toml" package.version | \
+		sed 's/[" ]//g' )"
 
 	# Find out if we want to bump it.
+	set +e
 	_ver2="$( whiptail --inputbox "Set {{ pkg_name }} version:" --title "Release Version" 0 0 "$_ver1" 3>&1 1>&2 2>&3 )"
 
 	exitstatus=$?
 	if [ $exitstatus != 0 ] || [ "$_ver1" = "$_ver2" ]; then
 		exit 0
 	fi
-
-	fyi success "Setting version to $_ver2."
+	set -e
 
 	# Set the release version!
-	just _version "{{ justfile_directory() }}" "$_ver2"
+	tomli set -f "{{ justfile_directory() }}/Cargo.toml" -i package.version "$_ver2"
+
+	fyi success "Set version to $_ver2."
+
+	# Update the credits.
 	just credits
-
-
-# Set version for real.
-@_version DIR VER:
-	[ -f "{{ DIR }}/Cargo.toml" ] || exit 1
-
-	# Set the release version!
-	toml set "{{ DIR }}/Cargo.toml" package.version "{{ VER }}" > /tmp/Cargo.toml
-	just _fix-chown "/tmp/Cargo.toml"
-	mv "/tmp/Cargo.toml" "{{ DIR }}/Cargo.toml"
 
 
 # Fix file/directory permissions.
