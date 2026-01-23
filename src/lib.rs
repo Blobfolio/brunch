@@ -221,7 +221,6 @@ The _Method_ column speaks for itself, but the numbers deserve a little explanat
 	unused_import_braces,
 )]
 
-#![expect(clippy::needless_doctest_main, reason = "False positive.")]
 #![expect(clippy::redundant_pub_crate, reason = "Unresolvable.")]
 
 mod bench;
