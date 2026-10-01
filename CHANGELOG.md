@@ -1,13 +1,19 @@
 # Changelog
 
 
+## [0.12.0](https://github.com/Blobfolio/brunch/releases/tag/v0.12.0) - 2026-10-01
+
+### Changed
+
+* Bump MSRV to `1.95`
+* Miscellaneous code cleanup and lints
+
 
 ## [0.11.1](https://github.com/Blobfolio/brunch/releases/tag/v0.11.0) - 2026-01-22
 
 ### Changed
 
 * Miscellaneous code cleanup and lints
-
 
 
 ## [0.11.0](https://github.com/Blobfolio/brunch/releases/tag/v0.11.0) - 2025-06-26
@@ -19,13 +25,11 @@
 * Miscellaneous code cleanup and lints
 
 
-
 ## [0.10.4](https://github.com/Blobfolio/brunch/releases/tag/v0.10.3) - 2025-06-01
 
 ### Changed
 
 * Bump `dactyl` to `0.12`
-
 
 
 ## [0.10.3](https://github.com/Blobfolio/brunch/releases/tag/v0.10.3) - 2025-05-20
@@ -36,13 +40,11 @@
 * Remove `fyi_ansi`
 
 
-
 ## [0.10.2](https://github.com/Blobfolio/brunch/releases/tag/v0.10.2) - 2025-05-15
 
 ### Changed
 
 * Bump `fyi_ansi` to `2.1`
-
 
 
 ## [0.10.1](https://github.com/Blobfolio/brunch/releases/tag/v0.10.1) - 2025-05-15
@@ -57,7 +59,6 @@
 * Macro error introduced in (yanked) `0.10.0` release
 
 
-
 ## [0.9.0](https://github.com/Blobfolio/brunch/releases/tag/v0.9.0) - 2025-02-25
 
 ### Changed
@@ -68,13 +69,11 @@
 * Miscellaneous code cleanup and lints
 
 
-
 ## [0.8.1](https://github.com/Blobfolio/brunch/releases/tag/v0.8.1) - 2025-01-09
 
 ### Changed
 
 * Miscellaneous code cleanup and lints
-
 
 
 ## [0.8.0](https://github.com/Blobfolio/brunch/releases/tag/v0.8.0) - 2024-12-07
@@ -85,15 +84,13 @@
 * Bump `dactyl` to `0.9`
 
 
-
 ## [0.7.0](https://github.com/Blobfolio/brunch/releases/tag/v0.7.0) - 2024-11-28
 
 ### Changed
 
 * Bump MSRV to `1.81`
 * Bump `dactyl` to `0.8`
-* Miscellaneous code changes and lints
-
+* Msicellaneous code cleanup and lints
 
 
 ## [0.6.1](https://github.com/Blobfolio/brunch/releases/tag/v0.6.1) - 2024-09-27
@@ -101,7 +98,6 @@
 ### Changed
 
 * Bump `unicode-width` to `0.2`
-
 
 
 ## [0.6.0](https://github.com/Blobfolio/brunch/releases/tag/v0.6.0) - 2024-09-05
@@ -112,14 +108,12 @@
 * Minor code changes and lints
 
 
-
 ## [0.5.3](https://github.com/Blobfolio/brunch/releases/tag/v0.5.3) - 2024-02-08
 
 ### Changed
 
 * Bump `dactyl` to `0.7`
 * Miscellaneous doc/script cleanup
-
 
 
 ## [0.5.2](https://github.com/Blobfolio/brunch/releases/tag/v0.5.2) - 2023-10-15
@@ -129,13 +123,11 @@
 * Bump `dactyl` to `0.6`
 
 
-
 ## [0.5.1](https://github.com/Blobfolio/brunch/releases/tag/v0.5.1) - 2023-10-05
 
 ### Changed
 
 * Minor code lints and cleanup
-
 
 
 ## [0.5.0](https://github.com/Blobfolio/brunch/releases/tag/v0.5.0) - 2023-06-01
@@ -145,7 +137,6 @@
 * Bump MSRV `1.70`
 * CI: test in debug and release modes
 * CI: verify MSRV
-
 
 
 ## [0.4.0](https://github.com/Blobfolio/brunch/releases/tag/v0.4.0) - 2023-01-26
@@ -161,7 +152,6 @@
 * Remove `BRUNCH_DIR` environmental variable
 
 
-
 ## [0.3.7](https://github.com/Blobfolio/brunch/releases/tag/v0.3.7) - 2022-12-15
 
 ### Changed
@@ -173,14 +163,12 @@
 * `black_box` fallback (for Rust <= `1.65`)
 
 
-
 ## [0.3.6](https://github.com/Blobfolio/brunch/releases/tag/v0.3.6) - 2022-09-22
 
 ### Changed
 
 * Improved docs
 * Miscellaneous code cleanup
-
 
 
 ## [0.3.5](https://github.com/Blobfolio/brunch/releases/tag/v0.3.5) - 2022-09-12
@@ -201,7 +189,6 @@
 * `BRUNCH_DIR=/path/to/dir` env (use `BRUNCH_HISTORY` instead)
 
 
-
 ## [0.3.4](https://github.com/Blobfolio/brunch/releases/tag/v0.3.4) - 2022-09-09
 
 ### New
@@ -213,7 +200,6 @@
 * Update dependencies
 
 
-
 ## [0.3.3](https://github.com/Blobfolio/brunch/releases/tag/v0.3.3) - 2022-09-06
 
 ### Changed
@@ -223,13 +209,11 @@
 * Drop `quantogram` dependency (it is now dev-only);
 
 
-
 ## [0.3.2](https://github.com/Blobfolio/brunch/releases/tag/v0.3.2) - 2022-08-23
 
 ### Changed
 
 * One _final_ coloration tweak. (Sorry for the release spam!)
-
 
 
 ## [0.3.1](https://github.com/Blobfolio/brunch/releases/tag/v0.3.1) - 2022-08-23
@@ -245,7 +229,6 @@
 
 * env `NO_BRUNCH_HISTORY` should only apply when `=1`;
 * Normalize whitespace in `Bench` names to prevent display weirdness;
-
 
 
 ## [0.3.0](https://github.com/Blobfolio/brunch/releases/tag/v0.3.0) - 2022-08-22
@@ -305,13 +288,11 @@ That's it! Apologies for the switch-up, but hopefully you'll agree the new layou
 * [`serde_derive`](https://crates.io/crates/serde_derive) dependency;
 
 
-
 ## [0.2.6](https://github.com/Blobfolio/brunch/releases/tag/v0.2.6) - 2022-06-18
 
 ### Misc
 
 * Update dependencies;
-
 
 
 ## [0.2.5](https://github.com/Blobfolio/brunch/releases/tag/v0.2.5) - 2022-04-12
@@ -321,13 +302,11 @@ That's it! Apologies for the switch-up, but hopefully you'll agree the new layou
 * Enable `num-traits` crate feature `i128` (needed for some targets).
 
 
-
 ## [0.2.4](https://github.com/Blobfolio/brunch/releases/tag/v0.2.4) - 2022-03-20
 
 ### Added
 
 * `Bench::spacer` (for visual separation of results);
-
 
 
 ## [0.2.3](https://github.com/Blobfolio/brunch/releases/tag/v0.2.3) - 2022-03-15
@@ -337,14 +316,12 @@ That's it! Apologies for the switch-up, but hopefully you'll agree the new layou
 * Update dependencies;
 
 
-
 ## [0.2.2](https://github.com/Blobfolio/brunch/releases/tag/v0.2.2) - 2022-01-13
 
 ### Changed
 
 * Updated docs;
 * Cleaned up lint overrides;
-
 
 
 ## [0.2.1](https://github.com/Blobfolio/brunch/releases/tag/v0.2.1) - 2021-12-02
@@ -356,7 +333,6 @@ That's it! Apologies for the switch-up, but hopefully you'll agree the new layou
 ### Changed
 
 * The list passed to the `brunch::benches!` macro may now include a trailing comma.
-
 
 
 ## [0.2.0](https://github.com/Blobfolio/brunch/releases/tag/v0.2.0) - 2021-10-21

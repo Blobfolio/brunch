@@ -1,9 +1,9 @@
 [package]
 name = "brunch"
-version = "0.11.1"
+version = "0.12.0"
 authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2024"
-rust-version = "1.88"
+rust-version = "1.95"
 description = "A simple micro-benchmark runner."
 license = "WTFPL"
 repository = "https://github.com/Blobfolio/brunch"
@@ -25,11 +25,11 @@ default-target = "x86_64-unknown-linux-gnu"
 name = "Brunch"
 
 [dependencies]
-dactyl = "0.13.*"
+dactyl = "0.14.*"
 unicode-width = "0.2.*"
 
 [dev-dependencies]
-quantogram = "=0.4.4"
+quantogram = "0.4.4"
 
 [[bench]]
 name = "fn_fib"
