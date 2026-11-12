@@ -84,10 +84,9 @@ impl Abacus {
 	pub(crate) fn deviation(&self) -> f64 {
 		if self.is_empty() || self.unique == 1 { return 0.0; }
 		let mean = self.mean();
-		let squares: Vec<f64> = self.set.iter()
+		let sum: f64 = self.set.iter()
 			.map(|n| (mean - *n).powi(2))
-			.collect();
-		let sum: f64 = squares.iter().sum();
+			.sum();
 		(sum / self.f_len()).sqrt()
 	}
 

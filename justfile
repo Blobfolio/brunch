@@ -22,6 +22,8 @@ cargo_dir   := "/tmp/" + pkg_id + "-cargo"
 doc_dir     := justfile_directory() + "/doc"
 release_dir := justfile_directory() + "/release"
 
+export RUSTFLAGS := "-Dwarnings"
+
 
 
 # Bench it!
