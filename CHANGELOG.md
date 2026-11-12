@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [0.12.1](https://github.com/Blobfolio/brunch/releases/tag/v0.12.1) - 2026-11-12
+
+### Changed
+
+* Miscellaneous code cleanup and lints
+
+
 ## [0.12.0](https://github.com/Blobfolio/brunch/releases/tag/v0.12.0) - 2026-10-01
 
 ### Changed
